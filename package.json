@@ -1,0 +1,7 @@
+{
+  "name": "wp-plugin-boilerplate",
+  "version": "0.0.1",
+  "dependencies": {
+    "yaml": "^2.1.1"
+  }
+}
