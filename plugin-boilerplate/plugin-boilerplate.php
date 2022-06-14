@@ -16,13 +16,11 @@
  * Text Domain:     PLUGIN_TEXT_DOMAIN
  * License:         PLUGIN_LICENSE
  * License URI:     PLUGIN_LICENSE_URI
- * Requires PHP:    7.0
+ * Requires PHP:    PLUGIN_PHP_VERSION
  */
 
 // If this file is called directly, abort.
-if ( !defined( 'ABSPATH' ) ) {
-	die( 'We\'re sorry, but you can not directly access this file.' );
-}
+defined('ABSPATH') or die('Error. You cannot directly access this file.');
 
 define( 'PLUGIN_PREFIX_VERSION', '1.0.0' );
 define( 'PLUGIN_PREFIX_TEXTDOMAIN', 'PLUGIN_TEXT_DOMAIN' );
