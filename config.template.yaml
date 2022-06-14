@@ -5,6 +5,13 @@
 #   3. Run `npm run generate`
 #
 
+# Where should the plugin be generated?
+# Note: Do not include the plugin slug in the path
+# If ZIP is set to true, the PLUGIN_SLUG.zip will be generated.
+# If ZIP is false, the PLUGIN_SLUG will be the folder name.
+DESTINATION: '/path/to/wordpress/wp-content/plugins'
+ZIP: false
+
 # `Plugin Name`
 PLUGIN_NAME: 'Plugin Boilerplate'
 
@@ -20,22 +27,24 @@ PLUGIN_VERSION: '0.0.1'
 # @package, Note the underscore
 PLUGIN_PACKAGE: 'Plugin_Boilerplate'
 
+# `Author URI`:
+PLUGIN_AUTHOR_URI: 'https://'
+
 # @author and `Author`
-PLUGIN_AUTHOR: 'Your Name'
+PLUGIN_AUTHOR_NAME: 'Your Name'
+
+# @author
+PLUGIN_AUTHOR_EMAIL: 'youremail@yourdomain.com'
 
 # @link and `Plugin URI`
 PLUGIN_URI: 'https://'
 
-# `Author URI`:
-PLUGIN_AUTHOR_URI: 'https://'
-
 # @license and `License`
-PLUGIN_LICENSE: 'Private'
 PLUGIN_LICENSE_URI: ''
+PLUGIN_LICENSE_NAME: 'Private'
 
 # @copyright
-COPYRIGHT_YEAR: '2022'
-COPYRIGHT_HOLDER: 'Person or Business'
+COPYRIGHT: '2022 Person or Business'
 
 # `Text Domain`:
 PLUGIN_TEXT_DOMAIN: 'pluginboilerplate'
@@ -43,6 +52,20 @@ PLUGIN_TEXT_DOMAIN: 'pluginboilerplate'
 # `Requires PHP`
 PLUGIN_PHP_VERSION: '7.0'
 
-# PLUGIN_PREFIX is used where the short version
-# of the plugin name is required.
-PLUGIN_PREFIX: 'BP'
+# PLUGIN_CONST_PREFIX is used to prefix constants
+# Recommend: Short abbreviation
+PLUGIN_CONST_PREFIX: 'BP'
+
+# PLUGIN_FUNC_PREFIX is used to prefix functions
+# Recommend: One word, snake case if you have to have two
+PLUGIN_FUNC_PREFIX: 'boiler'
+
+# The minimum capability for the Admin functionality
+PLUGIN_MIN_ADMIN_CAPABILITY: 'administrator'
+
+# Libraries to include. These are cloned into `lib`.
+LIBRARIES:
+  # Formr easily generates and validates forms
+  # Useful for settings
+  # Note: License for Formr is GPL v2
+  formr: 'https://github.com/formr/Formr'

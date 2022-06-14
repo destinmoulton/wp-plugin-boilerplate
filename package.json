@@ -2,6 +2,8 @@
   "name": "wp-plugin-boilerplate",
   "version": "0.0.1",
   "dependencies": {
+    "git-clone": "^0.2.0",
+    "glob": "^8.0.3",
     "yaml": "^2.1.1"
   }
 }

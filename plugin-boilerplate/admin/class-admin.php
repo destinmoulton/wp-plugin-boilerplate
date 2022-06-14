@@ -6,14 +6,16 @@
  * directory.
  *
  * @package   PLUGIN_PACKAGE
- * @author    PLUGIN_AUTHOR <PLUGIN_AUTHOR_EMAIL>
- * @copyright COPYRIGHT_YEAR COPYRIGHT_HOLDER
- * @license   PLUGIN_LICENSE
+ * @author    PLUGIN_AUTHOR_NAME <PLUGIN_AUTHOR_EMAIL>
+ * @copyright COPYRIGHT
+ * @license   PLUGIN_LICENSE_NAME
  * @link      PLUGIN_URI
  */
 
-namespace PLUGIN_PACKAGE\Admin;
+namespace PLUGIN_PACKAGE;
 
 class Admin {
+	public function run(){
 
+	}
 }

@@ -1,1 +1,4 @@
 .idea
+config.yaml
+temp_wordpress
+node_modules

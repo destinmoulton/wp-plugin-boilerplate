@@ -11,6 +11,6 @@ class ExampleTool extends AbstractAdminTool {
 	 * @inheritDoc
 	 */
 	public function render() {
-		// TODO: Implement render() method.
+		require_once(plugin_dir_path( __FILE__ )."/partials/example-tool.partial.php");
 	}
 }
