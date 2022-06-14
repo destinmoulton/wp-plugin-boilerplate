@@ -2,7 +2,7 @@
 /**
  * Initialize and load the admin section.
  *
- * Tools should be placed in the top level `admin-tools`
+ * Tools should be placed in the top level `tools`
  * directory.
  *
  * @package   PLUGIN_PACKAGE

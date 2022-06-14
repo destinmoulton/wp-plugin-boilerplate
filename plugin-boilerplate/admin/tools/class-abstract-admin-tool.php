@@ -1,6 +1,6 @@
 <?php
 
-namespace PLUGIN_PACKAGE\AdminTools;
+namespace PLUGIN_PACKAGE\Admin\Tools;
 
 /**
  * This is the base class for the Admin Tools.
