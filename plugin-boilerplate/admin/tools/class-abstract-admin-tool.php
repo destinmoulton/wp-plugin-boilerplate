@@ -30,36 +30,36 @@ abstract class AbstractAdminTool {
 	/**
 	 * @return string
 	 */
-	public function getToolTitle() {
+	public function get_title() {
 		return $this->title;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getToolSlug() {
+	public function get_slug() {
 		return $this->slug;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getToolURISlug() {
+	public function get_uri_slug() {
 		return $this->uri_slug;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getToolDescription() {
+	public function get_description() {
 		return $this->description;
 	}
 
 	/**
 	 * @return array ie array($this, "render");
 	 */
-	public function getToolRenderMethod() {
-		return array( $this, "render" );
+	public function get_run_method() {
+		return array( $this, "run" );
 	}
 
 	/**
@@ -72,5 +72,5 @@ abstract class AbstractAdminTool {
 	/**
 	 * @return void
 	 */
-	abstract public function render();
+	abstract public function run();
 }

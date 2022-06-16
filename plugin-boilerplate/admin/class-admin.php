@@ -54,9 +54,9 @@ class Admin {
 		$tools = $this->toolmanager->get_tools();
 		foreach ( $tools as $t ) {
 
-			$title       = $t->getToolTitle();
-			$uri_slug    = $t->getToolURISlug();
-			$description = $t->getToolDescription();
+			$title       = $t->get_title();
+			$uri_slug    = $t->get_uri_slug();
+			$description = $t->get_description();
 			$url         = admin_url( 'admin.php?page=' . $uri_slug );
 			echo "<li><a href='" . $url . "'>" . $title . "</a><br/><em>" . $description . "</em></li>";
 		}

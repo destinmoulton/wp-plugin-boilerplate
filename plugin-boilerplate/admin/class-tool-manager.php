@@ -40,12 +40,19 @@ class ToolManager {
 		$this->tools[] = $tool;
 	}
 
+	/**
+	 * Build the sub-menu entries using the tools.
+	 *
+	 * @param $main_menu_slug string
+	 *
+	 * @return void
+	 */
 	public function build_submenu( $main_menu_slug ) {
 		foreach ( $this->tools as $t ) {
-			$title    = $t->getToolTitle();
-			$uri_slug = $t->getToolURISlug();
-			$render   = $t->getToolRenderMethod();
-			add_submenu_page( $main_menu_slug, $title, $title, PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY, $uri_slug, $render );
+			$title      = $t->get_title();
+			$uri_slug   = $t->get_uri_slug();
+			$run_method = $t->get_run_method();
+			add_submenu_page( $main_menu_slug, $title, $title, PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY, $uri_slug, $run_method );
 		}
 	}
 

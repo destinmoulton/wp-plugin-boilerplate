@@ -28,7 +28,7 @@ class LogTool extends AbstractAdminTool {
 		$this->description = __( "Simple debugging via console or log file.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 	}
 
-	public function render() {
+	public function run() {
 		/** @var \PLUGIN_PACKAGE\Logger $PLUGIN_FUNC_PREFIX_logger */
 		global $PLUGIN_FUNC_PREFIX_logger;
 		$redirect = false;
