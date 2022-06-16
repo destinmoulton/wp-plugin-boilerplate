@@ -1,6 +1,9 @@
 {
   "name": "wp-plugin-boilerplate",
   "version": "0.0.1",
+  "scripts": {
+    "generate": "node generate.js"
+  },
   "dependencies": {
     "git-clone": "^0.2.0",
     "glob": "^8.0.3",
