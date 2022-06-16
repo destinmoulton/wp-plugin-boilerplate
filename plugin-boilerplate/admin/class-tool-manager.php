@@ -1,4 +1,15 @@
-<?php /** @noinspection SpellCheckingInspection */
+<?php
+/**
+ * The Tool Manager
+ *  - Load tools
+ *  - Add them to the submenu
+ *
+ * @package   PLUGIN_PACKAGE
+ * @author    PLUGIN_AUTHOR_NAME <PLUGIN_AUTHOR_EMAIL>
+ * @copyright COPYRIGHT
+ * @license   PLUGIN_LICENSE_NAME
+ * @link      PLUGIN_URI
+ */
 
 namespace PLUGIN_PACKAGE\Admin;
 
