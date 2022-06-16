@@ -20,22 +20,23 @@
  */
 
 // If this file is called directly, abort.
-defined('ABSPATH') or die('Error. You cannot directly access this file.');
+defined( 'ABSPATH' ) or die( 'Error. You cannot directly access this file.' );
 
 define( 'PLUGIN_CONST_PREFIX_VERSION', '1.0.0' );
 define( 'PLUGIN_CONST_PREFIX_TEXTDOMAIN', 'PLUGIN_TEXT_DOMAIN' );
 define( 'PLUGIN_CONST_PREFIX_NAME', 'PLUGIN_NAME' );
+define( 'PLUGIN_CONST_PREFIX_SLUG', 'PLUGIN_SLUG' );
 define( 'PLUGIN_CONST_PREFIX_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'PLUGIN_CONST_PREFIX_PLUGIN_ABSOLUTE', __FILE__ );
 define( 'PLUGIN_CONST_PREFIX_MIN_PHP_VERSION', '7.0' );
 define( 'PLUGIN_CONST_PREFIX_WP_VERSION', '5.3' );
-define( 'PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY', 'PLUGIN_MIN_ADMIN_CAPABILITY');
+define( 'PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY', 'PLUGIN_MIN_ADMIN_CAPABILITY' );
 
 
 add_action(
 	'plugins_loaded',
 	static function () {
-		require_once(PLUGIN_CONST_PREFIX_PLUGIN_ROOT."/includes/class-plugin.php");
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-plugin.php" );
 		\PLUGIN_PACKAGE\Plugin::run();
 	}
 );

@@ -24,7 +24,7 @@ function gizmo_log_wp_action_console_output() {
 
 class Logger {
 
-    /** @var array */
+	/** @var array */
 	private $log;
 
 	/** @var array */
@@ -78,7 +78,7 @@ class Logger {
 	}
 
 	public function __destruct() {
-		if ( $this->options['type'] == "file" ) {
+		if ( $this->is_logging_to_file() ) {
 			$this->output_logfile();
 		}
 	}
@@ -215,10 +215,17 @@ class Logger {
 
 
 	/**
-	 * @return false
+	 * @return bool
 	 */
 	public function is_logging() {
 		return $this->is_configured;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function is_logging_to_file() {
+		return $this->is_configured && $this->options['type'] == 'file';
 	}
 
 	/**
@@ -313,5 +320,12 @@ class Logger {
 		}
 
 		file_put_contents( $this->get_log_file_path(), $txt, FILE_APPEND );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_log_file_contents() {
+		return file_get_contents( $this->get_log_file_path() );
 	}
 }
