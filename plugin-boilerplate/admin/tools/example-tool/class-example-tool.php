@@ -31,7 +31,7 @@ class ExampleTool extends AbstractAdminTool {
 	 */
 	public function render() {
 		// You can add notices that will display in the header
-		\PLUGIN_PACKAGE\Notices::success( "test" );
+		\PLUGIN_PACKAGE\Notices::success( "Example successful notification." );
 
 		// Add variables to the partial template via
 		// a keyed array. The key will be extracted
