@@ -17,17 +17,28 @@ class ExampleTool extends AbstractAdminTool {
 	protected $slug = "example-tool";
 	protected $description;
 
-	public function __construct() {
-		parent::__construct();
-
+	protected function init() {
 		$this->title       = __( "Example Tool", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
-		$this->description = __( "Simple example tool. Does nothing really.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
+		$this->description = __( "Simple example tool. Copy this folder ('admin/tools/example-tool') to make your own tool.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 	}
 
 	/**
+	 * This function is called when the menu option is clicked.
+	 *
+	 * Put your tool routing in this function.
+	 *
 	 * @inheritDoc
 	 */
-	public function run() {
-		require_once( plugin_dir_path( __FILE__ ) . "partials/example-tool.partial.php" );
+	public function render() {
+		// You can add notices that will display in the header
+		\PLUGIN_PACKAGE\Notices::success( "test" );
+
+		// Add variables to the partial template via
+		// a keyed array. The key will be extracted
+		// into the variable.
+		$pdata = [
+			'hello_world' => "Hello, world!"
+		];
+		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/example-tool.partial.php", $pdata );
 	}
 }

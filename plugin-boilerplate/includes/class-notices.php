@@ -14,12 +14,15 @@
  * @link      PLUGIN_URI
  */
 
+namespace PLUGIN_PACKAGE;
+global $PLUGIN_FUNC_PREFIX_notices;
+$PLUGIN_FUNC_PREFIX_notices = [];
+
 class Notices {
-	private $notices = [];
 
 
-	public function run() {
-		add_action( 'admin_notices', array( $this, "wp_action_admin_notices" ) );
+	public static function set_hook() {
+		add_action( 'admin_notices', '\PLUGIN_PACKAGE\Notices::wp_action_admin_notices' );
 	}
 
 	/**
@@ -27,8 +30,8 @@ class Notices {
 	 *
 	 * @return void
 	 */
-	public function success( $msg ) {
-		$this->add( $msg, "success" );
+	public static function success( $msg ) {
+		self::add( $msg, "success" );
 	}
 
 	/**
@@ -36,8 +39,8 @@ class Notices {
 	 *
 	 * @return void
 	 */
-	public function error( $msg ) {
-		$this->add( $msg, "error" );
+	public static function error( $msg ) {
+		self::add( $msg, "error" );
 	}
 
 	/**
@@ -45,8 +48,8 @@ class Notices {
 	 *
 	 * @return void
 	 */
-	public function warning( $msg ) {
-		$this->add( $msg, "warning" );
+	public static function warning( $msg ) {
+		self::add( $msg, "warning" );
 	}
 
 	/**
@@ -54,8 +57,8 @@ class Notices {
 	 *
 	 * @return void
 	 */
-	public function info( $msg ) {
-		$this->add( $msg, "info" );
+	public static function info( $msg ) {
+		self::add( $msg, "info" );
 	}
 
 	/**
@@ -64,8 +67,9 @@ class Notices {
 	 *
 	 * @return void
 	 */
-	public function add( $msg, $type ) {
-		$this->notices[] = [
+	public static function add( $msg, $type ) {
+		global $PLUGIN_FUNC_PREFIX_notices;
+		$PLUGIN_FUNC_PREFIX_notices[] = [
 			'msg'  => $msg,
 			'type' => $type
 		];
@@ -73,18 +77,18 @@ class Notices {
 
 
 	/**
-	 * Called by the 'admin_notices' hook set in the run()
-	 * function
+	 * Called by the admin-header.partial.php
 	 *
 	 * @return void
 	 */
-	public function wp_action_admin_notices() {
-		if ( count( $this->notices ) > 0 ) {
-			foreach ( $this->notices as $note ) {
+	public static function display_all() {
+		global $PLUGIN_FUNC_PREFIX_notices;
+		if ( count( $PLUGIN_FUNC_PREFIX_notices ) > 0 ) {
+			foreach ( $PLUGIN_FUNC_PREFIX_notices as $note ) {
 				?>
-				<div class="notice notice-<?= $note['type'] ?> is-dismissible">
-					<p><?php _e( $note['msg'], PLUGIN_CONST_PREFIX_TEXTDOMAIN ); ?></p>
-				</div>
+                <div class="notice notice-<?= $note['type'] ?> is-dismissible">
+                    <p><?php _e( $note['msg'], PLUGIN_CONST_PREFIX_TEXTDOMAIN ); ?></p>
+                </div>
 				<?php
 			}
 		}

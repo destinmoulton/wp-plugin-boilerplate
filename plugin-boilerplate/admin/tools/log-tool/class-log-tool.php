@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
 
 /**
  * The Debugger Tool
@@ -21,14 +21,12 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 class LogTool extends AbstractAdminTool {
 	protected $slug = "log-tool";
 
-	public function __construct() {
-		parent::__construct();
-
+	protected function init() {
 		$this->title       = __( "Log Tool", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 		$this->description = __( "Simple debugging via console or log file.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 	}
 
-	public function run() {
+	public function render() {
 		/** @var \PLUGIN_PACKAGE\Logger $PLUGIN_FUNC_PREFIX_logger */
 		global $PLUGIN_FUNC_PREFIX_logger;
 		$redirect = false;
@@ -66,20 +64,23 @@ class LogTool extends AbstractAdminTool {
 			}
 		}
 
-		$query_params = array( "page" => $this->uri_slug );
-		$tool_url     = admin_url( 'admin.php?' . http_build_query( $query_params ) );
+		$pdata             = [];
+		$query_params      = array( "page" => $this->uri_slug );
+		$pdata['tool_url'] = admin_url( 'admin.php?' . http_build_query( $query_params ) );
 		if ( $redirect ) {
-			require_once( $this->get_path() . "partials/js-redirect.partial.php" );
+			$this->add_partial( $this->get_path() . "partials/js-redirect.partial.php", $pdata );
 		} else {
-			$logger_is_running  = $PLUGIN_FUNC_PREFIX_logger->is_logging();
-			$is_logging_to_file = $PLUGIN_FUNC_PREFIX_logger->is_logging_to_file();
-			require_once( $this->get_path() . "partials/log-tool-options.partial.php" );
+			$pdata['logger_is_running']  = $PLUGIN_FUNC_PREFIX_logger->is_logging();
+			$pdata['is_logging_to_file'] = $PLUGIN_FUNC_PREFIX_logger->is_logging_to_file();
 
-			if ( $is_logging_to_file ) {
-				$logfile_path     = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
-				$logfile_contents = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
-				$logfile_entries  = explode( $PLUGIN_FUNC_PREFIX_logger->logfile_separator, $logfile_contents );
-				require_once( $this->get_path() . "partials/log-file.partial.php" );
+			$this->add_partial( $this->get_path() . "partials/log-tool-options.partial.php", $pdata );
+
+			if ( $pdata['is_logging_to_file'] ) {
+				$logfile_path             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
+				$logfile_contents         = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
+				$pdata['logfile_path']    = $logfile_path;
+				$pdata['logfile_entries'] = explode( $PLUGIN_FUNC_PREFIX_logger->logfile_separator, $logfile_contents );
+				$this->add_partial( $this->get_path() . "partials/log-file.partial.php", $pdata );
 			}
 		}
 	}

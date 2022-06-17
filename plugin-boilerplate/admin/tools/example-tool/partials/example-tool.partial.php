@@ -1,2 +1,2 @@
-<h1>Example Tool</h1>
-<p>This tool doesn't do anything yet...</p>
+<h2>Example Tool</h2>
+<p><?= $hello_world ?></p>

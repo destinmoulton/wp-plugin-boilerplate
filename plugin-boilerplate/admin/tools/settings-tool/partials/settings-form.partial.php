@@ -1,2 +1,2 @@
-<h1>Example Tool</h1>
-<p>This tool doesn't do anything yet...</p>
+<h2>Settings</h2>
+<p>The form will appear here.</p>

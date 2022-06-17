@@ -31,7 +31,11 @@ class Plugin {
 		// Logger class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
 
-		// Initialize logger function(s)
+		// Initialize logger function PLUGIN_FUNC_PREFIX_log()
+		// Even if you don't use the logger,
+		// you might want to keep this permanently loaded
+		// You can add logging messages in your code, and then re-add
+		// the logger above when you want to start to actually log stuff.
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "functions/logger.php" );
 	}
 
@@ -39,6 +43,10 @@ class Plugin {
 	 * @return void
 	 */
 	private static function require_admin() {
+		// WP Notices
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-notices.php" );
+
+
 		// Admin class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/class-admin.php" );
 
