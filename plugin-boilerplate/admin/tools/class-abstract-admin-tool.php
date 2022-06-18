@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
 
 namespace PLUGIN_PACKAGE\Admin\Tools;
 
@@ -90,6 +90,28 @@ abstract class AbstractAdminTool {
 			extract( $part['vars'] );
 			require $part['partial'];
 		}
+	}
+
+	/**
+	 * @param $url string The URL to redirect to.
+	 * @param $js_redirect bool Should do a js redirect?
+	 *
+	 * @return void
+	 */
+	protected function redirect( $url, $js_redirect = false ) {
+		if ( $js_redirect ) {
+			// Clear any other partials
+			$this->partials = [];
+
+			$pvars = [
+				'redirect_url' => $url
+			];
+			$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/js-redirect.partial.php", $pvars );
+
+			return;
+		}
+		wp_redirect( $url );
+		exit();
 	}
 
 	/**

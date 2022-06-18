@@ -68,7 +68,10 @@ class LogTool extends AbstractAdminTool {
 		$query_params      = array( "page" => $this->uri_slug );
 		$pdata['tool_url'] = admin_url( 'admin.php?' . http_build_query( $query_params ) );
 		if ( $redirect ) {
-			$this->add_partial( $this->get_path() . "partials/js-redirect.partial.php", $pdata );
+
+			// Do a js redirect so that the cookie
+			// is set
+			$this->redirect( $pdata['tool_url'], true );
 		} else {
 			$pdata['logger_is_running']  = $PLUGIN_FUNC_PREFIX_logger->is_logging();
 			$pdata['is_logging_to_file'] = $PLUGIN_FUNC_PREFIX_logger->is_logging_to_file();
