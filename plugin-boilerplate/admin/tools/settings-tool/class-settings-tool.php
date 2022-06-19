@@ -12,6 +12,7 @@
 
 namespace PLUGIN_PACKAGE\Admin\Tools;
 
+use PLUGIN_PACKAGE\Settings;
 
 class SettingsTool extends AbstractAdminTool {
 	protected $title;
@@ -27,6 +28,9 @@ class SettingsTool extends AbstractAdminTool {
 	 * @inheritDoc
 	 */
 	public function render() {
+		// Load the formr library
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "lib/formr/class.formr.php" );
+
 		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/settings-form.partial.php" );
 	}
 
@@ -38,6 +42,25 @@ class SettingsTool extends AbstractAdminTool {
 	 * @return void
 	 */
 	private function build_form() {
+		$form = new Formr\Formr( 'bootstrap' );
 
+		$settings = Settings::get_all();
+		foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $set ) {
+			$placeholder = $set['placeholder'] ?? "";
+			$class       = $set['class'] ?? "";
+			switch ( $set['type'] ) {
+				case 'text':
+					$field = [
+						'name'        => $set['name'],
+						'label'       => $set['label'],
+						'id'          => $set['name'],
+						'value'       => $settings[ $set['name'] ],
+						'class'       => $class,
+						'placeholder' => $placeholder
+					];
+					$form->text( $field );
+					break;
+			}
+		}
 	}
 }

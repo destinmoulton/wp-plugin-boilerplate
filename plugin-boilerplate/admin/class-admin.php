@@ -22,6 +22,7 @@ class Admin {
 	private $menu_slug = PLUGIN_CONST_PREFIX_SLUG;
 
 	public function run() {
+
 		// Load the tool functions
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/functions/tools.functions.php" );
 		// Abstract Tool that all Tools inherit from
