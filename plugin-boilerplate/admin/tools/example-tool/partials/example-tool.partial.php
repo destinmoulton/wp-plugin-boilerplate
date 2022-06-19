@@ -5,11 +5,15 @@
  *
  * Variables are passed in using a keyed array to
  * the add_partial() function call in the tool class.
+ *
+ * $TOOL_INFO is passed to every partial template.
  */
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+/** @var $TOOL_INFO array Has tool `title`, `description`, `url`, 'slug`, `uri_slug` */
 /** @var $hello_world string */
 ?>
-<h2>Example Tool</h2>
+<h2><?= $TOOL_INFO['title'] ?></h2>
 <p><?= $hello_world ?></p>
+<p><?= PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'test_action' ] ) ?>

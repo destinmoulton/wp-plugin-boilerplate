@@ -13,6 +13,8 @@ abstract class AbstractAdminTool {
 	/** @var string */
 	protected $uri_slug;
 	/** @var string */
+	protected $base_url;
+	/** @var string */
 	protected $description;
 	/** @var array */
 	protected $partials;
@@ -20,6 +22,7 @@ abstract class AbstractAdminTool {
 	public function __construct() {
 		// Initialize the uri_slug using the plugin slug
 		$this->uri_slug = PLUGIN_CONST_PREFIX_SLUG . "-" . $this->slug;
+		$this->base_url = admin_url( 'admin.php?' . http_build_query( [ 'page' => $this->uri_slug ] ) );
 		$this->init();
 	}
 
@@ -88,6 +91,16 @@ abstract class AbstractAdminTool {
 			// the variable name(s) for use
 			// in the required partial template
 			extract( $part['vars'] );
+
+			// Make tool information available to every
+			// template partial
+			$TOOL_INFO = [
+				'title'       => $this->title,
+				'description' => $this->description,
+				'slug'        => $this->slug,
+				'uri_slug'    => $this->uri_slug,
+				'base_url'    => $this->base_url,
+			];
 			require $part['partial'];
 		}
 	}

@@ -33,6 +33,18 @@ class ExampleTool extends AbstractAdminTool {
 		// You can add notices that will display in the header
 		\PLUGIN_PACKAGE\Notices::success( "Example successful notification." );
 
+		// Functionality can be added via query parameters
+		// In this case we use an 'action' in the url
+		if ( isset( $_GET['action'] ) ) {
+			switch ( $_GET['action'] ) {
+				case 'do_something':
+					// Do stuff...
+					break;
+				default:
+					break;
+			}
+		}
+
 		// Add variables to the partial template via
 		// a keyed array. The key will be extracted
 		// into the variable.
