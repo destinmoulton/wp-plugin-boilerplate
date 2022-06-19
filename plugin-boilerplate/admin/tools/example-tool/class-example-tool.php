@@ -39,6 +39,7 @@ class ExampleTool extends AbstractAdminTool {
 			switch ( $_GET['action'] ) {
 				case 'do_something':
 					// Do stuff...
+					\PLUGIN_PACKAGE\Notices::info( "An action via query parameter was just performed." );
 					break;
 				default:
 					break;

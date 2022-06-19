@@ -9,6 +9,7 @@
  * @link      PLUGIN_URI
  */
 
+namespace PLUGIN_PACKAGE\Admin\Tools;
 /**
  * Build a tool url
  *
@@ -20,7 +21,7 @@
 function PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, $query_args ) {
 	$uri_parts = [];
 	foreach ( $query_args as $qkey => $qval ) {
-		$uri_parts .= $qkey . "=" . $qval;
+		$uri_parts[] = $qkey . "=" . $qval;
 	}
 	$quri = implode( "&", $uri_parts );
 
