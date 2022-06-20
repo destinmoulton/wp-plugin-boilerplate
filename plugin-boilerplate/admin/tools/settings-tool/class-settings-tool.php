@@ -22,6 +22,7 @@ class SettingsTool extends AbstractAdminTool {
 	protected function init() {
 		$this->title       = __( "Settings", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 		$this->description = __( "Manage PLUGIN_NAME settings.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
+
 	}
 
 	/**
@@ -31,36 +32,13 @@ class SettingsTool extends AbstractAdminTool {
 		// Load the formr library
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "lib/formr/class.formr.php" );
 
-		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/settings-form.partial.php" );
+		$form  = new \Formr\Formr( 'bootstrap' );
+		$pvars = [
+			'form_builder' => $form,
+			'settings'     => Settings::get_all(),
+			'fields'       => \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTINGS,
+		];
+		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/settings-form.partial.php", $pvars );
 	}
 
-	/**
-	 * Build the settings form.
-	 *
-	 * Uses the `formr` library (https://github.com/formr/Formr)
-	 *
-	 * @return void
-	 */
-	private function build_form() {
-		$form = new Formr\Formr( 'bootstrap' );
-
-		$settings = Settings::get_all();
-		foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $set ) {
-			$placeholder = $set['placeholder'] ?? "";
-			$class       = $set['class'] ?? "";
-			switch ( $set['type'] ) {
-				case 'text':
-					$field = [
-						'name'        => $set['name'],
-						'label'       => $set['label'],
-						'id'          => $set['name'],
-						'value'       => $settings[ $set['name'] ],
-						'class'       => $class,
-						'placeholder' => $placeholder
-					];
-					$form->text( $field );
-					break;
-			}
-		}
-	}
 }

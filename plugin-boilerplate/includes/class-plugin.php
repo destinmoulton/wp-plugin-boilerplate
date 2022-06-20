@@ -28,8 +28,12 @@ class Plugin {
 	 * @return void
 	 */
 	private static function require_primary() {
-		// Settings
+		// Settings are configured in settings.constant.php
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "constants/settings.constant.php" );
+
+		// The Settings class with static methods
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-settings.php" );
+
 		// Logger class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
 
