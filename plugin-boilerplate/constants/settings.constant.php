@@ -15,57 +15,25 @@ namespace PLUGIN_PACKAGE;
 /**
  * Define the Settings
  *
- * The default configuration uses the `formr` library
+ * The default configuration uses the `ValidFormBuilder` library
  * to build the settings form and perform validation.
  *
- * For a list of all formr validation and sanitization rules, see:
- * https://formr.github.io/validation/
+ * This file defines the setting default values in a
+ * string keyed array:
+ *     PLUGIN_CONST_PREFIX_SETTING_DEFAULTS = [
+ *          'setting_key'=>'Value',
+ *          'setting_key_for_numeric'=>42
+ *     ];
  *
- * For a list of all input types:
- * https://formr.github.io/methods/#text-inputs
+ * These settings are used as the generic defaults for the plugin.
  *
- * NOTE: The 'string' Formr field has been replaced
- * with an 'attributes' array.
+ * The `PLUGIN_PACKAGE\Settings` class ('class-settings.php') will just return these values.
+ *
+ * The `settings-tool` ('admin/tools/settings-tool') allows you to define an interface
+ * for editing the settings in a form, validating them, and saving the settings to the WP options table.
  *
  * @const array[][]
  */
 const PLUGIN_CONST_PREFIX_SETTINGS = [
-	[
-		'type'       => 'text',
-		'label'      => 'Setting 1: A Simple Text Field',
-		'name'       => 'setting1',
-		'id'         => 'setting1', // You can leave out the id if you want it to be the name
-		'validation' => 'required',
-		'default'    => 'Hi!',
-		// An array of html attributes that will be added to the html
-		'attributes' => [
-			'class'       => 'text-css-class',
-			'placeholder' => 'Placeholder text'
-		]
-	],
-	[
-		'type'       => 'select', //or select_multiple
-		'label'      => 'Choose a size:',
-		'name'       => 'size',
-		// Change the `selected` for a select to
-		// an array and it automagically become a <select muliple>
-		'selected'   => [ 'small', 'large' ],
-		'validation' => 'required',
-		'attributes' => [
-			'class' => 'class-for-select'
-		],
-		// Formr includes a set of built-in options
-		// ie. states, months, countries, etc...
-		// To use them just change it to 'options' => 'states'
-		'options'    => [
-			'small' => 'Small',
-			'large' => 'Large'
-		]
-	],
-	[
-		'type'     => 'checkbox', //or select_multiple
-		'label'    => 'Check or uncheck this setting:',
-		'name'     => 'checky',
-		'selected' => 'checked'
-	]
+	'test-setting' => "This is a test setting."
 ];
