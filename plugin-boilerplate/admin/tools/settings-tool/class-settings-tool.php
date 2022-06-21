@@ -29,14 +29,11 @@ class SettingsTool extends AbstractAdminTool {
 	 * @inheritDoc
 	 */
 	public function render() {
-		// Load the formr library
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "lib/formr/class.formr.php" );
 
-		$form  = new \Formr\Formr( 'bootstrap' );
+
 		$pvars = [
-			'form_builder' => $form,
-			'settings'     => Settings::get_all(),
-			'fields'       => \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTINGS,
+			'settings' => Settings::get_all(),
+			'fields'   => \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTINGS,
 		];
 		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/settings-form.partial.php", $pvars );
 	}

@@ -24,29 +24,36 @@ namespace PLUGIN_PACKAGE;
  * For a list of all input types:
  * https://formr.github.io/methods/#text-inputs
  *
- * Multiple `checkbox` and `radio` elements are
- * configured in the SettingsTool class.
+ * NOTE: The 'string' Formr field has been replaced
+ * with an 'attributes' array.
  *
  * @const array[][]
  */
 const PLUGIN_CONST_PREFIX_SETTINGS = [
 	[
-		'type'        => 'text',
-		'label'       => 'Setting 1: A Simple Text Field',
-		'name'        => 'setting1',
-		'description' => 'This text appears along with the field.',
-		'validation'  => 'required',
-		'default'     => 'Hi!',
-		'class'       => 'field-css-class'
+		'type'       => 'text',
+		'label'      => 'Setting 1: A Simple Text Field',
+		'name'       => 'setting1',
+		'id'         => 'setting1', // You can leave out the id if you want it to be the name
+		'validation' => 'required',
+		'default'    => 'Hi!',
+		// An array of html attributes that will be added to the html
+		'attributes' => [
+			'class'       => 'text-css-class',
+			'placeholder' => 'Placeholder text'
+		]
 	],
 	[
 		'type'       => 'select', //or select_multiple
 		'label'      => 'Choose a size:',
 		'name'       => 'size',
-		// Change the `default` for a select to
+		// Change the `selected` for a select to
 		// an array and it automagically become a <select muliple>
-		'default'    => 'small',
+		'selected'   => [ 'small', 'large' ],
 		'validation' => 'required',
+		'attributes' => [
+			'class' => 'class-for-select'
+		],
 		// Formr includes a set of built-in options
 		// ie. states, months, countries, etc...
 		// To use them just change it to 'options' => 'states'
@@ -54,5 +61,11 @@ const PLUGIN_CONST_PREFIX_SETTINGS = [
 			'small' => 'Small',
 			'large' => 'Large'
 		]
+	],
+	[
+		'type'     => 'checkbox', //or select_multiple
+		'label'    => 'Check or uncheck this setting:',
+		'name'     => 'checky',
+		'selected' => 'checked'
 	]
 ];

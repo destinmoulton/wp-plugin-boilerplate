@@ -18,6 +18,7 @@ class Plugin {
 	public static function run() {
 		self::require_primary();
 
+
 		// Only load the admin functionality if the user is qualified
 		if ( \current_user_can( PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY ) ) {
 			self::require_admin();
@@ -56,7 +57,9 @@ class Plugin {
 		// Admin class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/class-admin.php" );
 
+
 		$admin = new Admin\Admin();
 		$admin->run();
 	}
+
 }

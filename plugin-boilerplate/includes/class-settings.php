@@ -30,7 +30,7 @@ class Settings {
 		// into a default array
 		$default_settings = [];
 		foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $set ) {
-			$default_settings[ $set['name'] ] = $set['default'];
+			$default_settings[ $set['name'] ] = $set['default'] ?? "";
 		}
 
 		return get_option( self::$option_key, $default_settings );
