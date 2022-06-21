@@ -5,6 +5,7 @@
     "generate": "node generate.js"
   },
   "dependencies": {
+    "fs-extra": "^10.1.0",
     "git-clone": "^0.2.0",
     "glob": "^8.0.3",
     "yaml": "^2.1.1"
