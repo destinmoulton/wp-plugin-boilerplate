@@ -29,8 +29,8 @@ class Plugin {
 	 * @return void
 	 */
 	private static function require_primary() {
-		// Settings are configured in settings.constant.php
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "constants/settings.constant.php" );
+		// Settings are configured in constants.php
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/constants.php" );
 
 		// The Settings class with static methods
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-settings.php" );
@@ -38,12 +38,8 @@ class Plugin {
 		// Logger class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
 
-		// Initialize logger function PLUGIN_FUNC_PREFIX_log()
-		// Even if you don't use the logger,
-		// you might want to keep this permanently loaded
-		// You can add logging messages in your code, and then re-add
-		// the logger above when you want to start to actually log stuff.
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "functions/logger.php" );
+		// Define functions in functions.php
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
 	}
 
 	/**
