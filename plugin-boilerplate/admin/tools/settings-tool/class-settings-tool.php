@@ -42,14 +42,14 @@ class SettingsTool extends AbstractAdminTool {
 		$new_settings = [];
 		if ( isset( $_POST[ $this->nonce_id ] ) ) {
 			if ( wp_verify_nonce( $_POST[ $this->nonce_id ], $this->nonce_id ) ) {
-				if ( $form->isValid() && $form->isSubmitted() ) {
-
-					foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $skey => $sval ) {
-						$new_settings = $form->getValidField( $skey )->getValue();
-
-					}
-					print_r( $new_settings );
-				}
+//				if ( $form->isValid() && $form->isSubmitted() ) {
+//
+//					foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $skey => $sval ) {
+//						$new_settings = $form->getValidField( $skey )->getValue();
+//
+//					}
+//					print_r( $new_settings );
+//				}
 			}
 		}
 		$pvars = [

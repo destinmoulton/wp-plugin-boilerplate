@@ -37,7 +37,7 @@ define( 'PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY', 'PLUGIN_MIN_ADMIN_CAPABILITY
 add_action(
 	'plugins_loaded',
 	static function () {
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-plugin.php" );
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/classes/class-plugin.php" );
 		\PLUGIN_PACKAGE\Plugin::run();
 	}
 );
