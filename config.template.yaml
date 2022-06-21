@@ -65,6 +65,6 @@ PLUGIN_MIN_ADMIN_CAPABILITY: 'administrator'
 
 # Libraries to include. These are cloned into `lib`.
 LIBRARIES:
-  # Carbon Fields
-  # Easily build forms in a WP friendly way
-  'carbon-fields': 'https://github.com/htmlburger/carbon-fields'
+  # ValidFormBuilder
+  # Easily build and validate forms
+  'validformbuilder': 'https://github.com/validformbuilder/validformbuilder'
