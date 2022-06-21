@@ -1,6 +1,6 @@
 <?php
 /**
- * The PLUGIN_NAME Admin Tools Functions
+ * The PLUGIN_NAME Admin Functions
  *
  * @package   PLUGIN_PACKAGE
  * @author    PLUGIN_AUTHOR_NAME <PLUGIN_AUTHOR_EMAIL>
@@ -9,7 +9,8 @@
  * @link      PLUGIN_URI
  */
 
-namespace PLUGIN_PACKAGE\Admin\Tools;
+namespace PLUGIN_PACKAGE\Admin;
+
 /**
  * Build a tool url
  *

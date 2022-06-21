@@ -23,10 +23,12 @@ class Admin {
 
 	public function run() {
 
-		// Load the tool functions
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/functions/tools.functions.php" );
+		// Load the admin functions
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/functions.php" );
+
 		// Abstract Tool that all Tools inherit from
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/tools/class-abstract-admin-tool.php" );
+
 		// Tool Manager loads the tools
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/class-tool-manager.php" );
 		$this->toolmanager = new ToolManager();
