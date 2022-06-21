@@ -29,14 +29,14 @@ class Plugin {
 	 * @return void
 	 */
 	private static function require_primary() {
+		// Logger class
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
+
 		// Settings are configured in constants.php
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/constants.php" );
 
 		// The Settings class with static methods
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-settings.php" );
-
-		// Logger class
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
 
 		// Define functions in functions.php
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );

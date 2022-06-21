@@ -16,12 +16,6 @@
 
 namespace PLUGIN_PACKAGE;
 
-// TODO: convert this to native method of Logger class
-function gizmo_log_wp_action_console_output() {
-	global $PLUGIN_FUNC_PREFIX_logger;
-	$PLUGIN_FUNC_PREFIX_logger->wp_action_output_console();
-}
-
 class Logger {
 
 	/** @var array */
@@ -54,13 +48,13 @@ class Logger {
 		$this->options                  = array();
 		$this->log                      = array();
 		$this->cookie_expiration_offset = 60 * 60 * 24 * 30; // 30 days
-		$this->cookie_path              = "";
+		$this->cookie_path              = "/";
 		$this->cookie_name              = "PLUGIN_FUNC_PREFIX_logger";
 
 		$this->default_options   = array(
 			"status"    => "enabled",
 			"type"      => "console", // either 'console' or 'file'
-			"file_name" => "gizmo_log.log",
+			"file_name" => "PLUGIN_FUNC_PREFIX.log",
 			"file_dir"  => WP_CONTENT_DIR,
 		);
 		$this->logfile_separator = "----------------------------------------------";
@@ -71,8 +65,8 @@ class Logger {
 			if ( $this->is_configured && $this->options['type'] == "console" ) {
 				// Queue the console output to run in the footer
 				// TODO: Change to local method call [$this, 'method_name']
-				add_action( 'wp_footer', "gizmo_log_wp_action_console_output", 100 );
-				add_action( 'admin_footer', "gizmo_log_wp_action_console_output", 100 );
+				add_action( 'wp_footer', [ $this, "wp_action_output_console" ], 100 );
+				add_action( 'admin_footer', [ $this, "wp_action_output_console" ], 100 );
 			}
 		}
 	}
@@ -155,12 +149,6 @@ class Logger {
 	}
 
 
-	private function setup_cookie_from_options() {
-		$expires = time() + $this->cookie_expiration_offset;
-		$cookie  = $this->encode_cookie( $this->options );
-		$this->set_cookie( $cookie, $expires );
-	}
-
 	/**
 	 * @param $key
 	 * @param $value
@@ -195,8 +183,14 @@ class Logger {
 		$this->set_cookie( "", time() - $this->cookie_expiration_offset );
 	}
 
+	private function setup_cookie_from_options() {
+		$expires = time() + $this->cookie_expiration_offset;
+		$cookie  = $this->encode_cookie( $this->options );
+		$this->set_cookie( $cookie, $expires );
+	}
+
 	private function set_cookie( $cookie, $expires ) {
-		setcookie( $this->cookie_name, $cookie, $expires, $this->cookie_path, home_url() );
+		setcookie( $this->cookie_name, $cookie, $expires, $this->cookie_path );
 	}
 
 	/**
@@ -277,7 +271,7 @@ class Logger {
         <script>
             (function () {
                 // GIZMO LOGGING
-                console.log("%cGizmo Logging is Enabled.", "color:green;");
+                console.log("%cPLUGIN_NAME Logging is Enabled.", "color:green;");
 				<?php
 				if(isset( $this->log )) {
 				foreach ($this->log as $idx=>$log) :

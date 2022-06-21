@@ -4,6 +4,7 @@
  */
 
 
+/** @var $TOOL_INFO array */
 /** @var $logfile_path string */
 /** @var $logfile_entries array */
 ?>
@@ -12,7 +13,7 @@
     <em><?= $logfile_path ?></em>
 </p>
 <ul class="">
-	<?
+	<?php
 	foreach ( $logfile_entries as $entry ) {
 		echo "<li>";
 		echo str_replace( PHP_EOL, "<br/>", $entry );
