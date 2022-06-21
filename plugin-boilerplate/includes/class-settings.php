@@ -26,14 +26,8 @@ class Settings {
 	 * @return array
 	 */
 	public static function get_all() {
-		// Unroll the settings constant
-		// into a default array
-		$default_settings = [];
-		foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $set ) {
-			$default_settings[ $set['name'] ] = $set['default'] ?? "";
-		}
 
-		return get_option( self::$option_key, $default_settings );
+		return get_option( self::$option_key, PLUGIN_CONST_PREFIX_SETTINGS );
 	}
 
 	/**

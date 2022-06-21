@@ -35,5 +35,32 @@ namespace PLUGIN_PACKAGE;
  * @const array[][]
  */
 const PLUGIN_CONST_PREFIX_SETTINGS = [
-	'test-setting' => "This is a test setting."
+	'test_text_setting'   => "This is a test setting.",
+	'test_api_group'      => [
+		'api_is_enabled' => false,
+		'api_endpoint'   => 'https://mytestserver.com/api/endpoint',
+		'api_key'        => '',
+		'api_secret'     => ''
+	],
+	'test_select_box'     => 'bar', // 'bar' will be the selected option (see OPTIONS below)
+	'test_checkbox_group' => 'blue'
 ];
+
+/**
+ * Multi-option Settings
+ *
+ * The array key correlates with the settings defined above.
+ *
+ */
+const PLUGIN_CONST_PREFIX_SETTING_OPTIONS = [
+	'test_select_box'     => [
+		'foo' => 'Foo',
+		'bar' => 'Bar',
+	],
+	'test_checkbox_group' => [
+		'red'   => 'Red',
+		'blue'  => 'Blue',
+		'green' => 'Green'
+	]
+];
+
