@@ -40,7 +40,12 @@ abstract class AbstractAdminTool {
 	public function run() {
 		// Add the admin header partial first
 		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-header.partial.php" );
-		$this->render();
+		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( $this->slug ) ) {
+			// Don't render without permissions
+			\PLUGIN_PACKAGE\Notices::error( "You do not have permissions to access this." );
+		} else {
+			$this->render();
+		}
 		$this->display_partials();
 	}
 
