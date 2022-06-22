@@ -4,9 +4,6 @@
  * Settings Form Partial Template
  */
 
-use \Carbon_Fields\Field\Field;
-use \Carbon_Fields\Container;
-
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 /** @var $TOOL_INFO array Has tool `title`, `description`, `url`, 'slug`, `uri_slug` */
