@@ -241,6 +241,20 @@ class Logger {
 		return true;
 	}
 
+	public function set_options( $newoptions ) {
+		if ( ! isset( $newoptions['enabled'] ) ) {
+			$newoptions['enabled'] = $this->options['enabled'];
+		}
+		if ( $this->are_options_valid( $newoptions ) ) {
+			$this->options = $newoptions;
+			$this->_set_user_meta();
+
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Enable logging with the default options.
 	 *
