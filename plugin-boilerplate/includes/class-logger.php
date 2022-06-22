@@ -3,9 +3,8 @@
 /**
  * PLUGIN_NAME Logger
  *  - JS Console or File Logging
- *  - Uses cookies to enable and configure
- *    Why cookies? So you can enable/disable it *without*
- *    using the Logger tool.
+ *  - Log just for single user
+ *  - WP User Meta to store the options
  *
  * @package   PLUGIN_PACKAGE
  * @author    PLUGIN_AUTHOR_NAME <PLUGIN_AUTHOR_EMAIL>
@@ -19,54 +18,98 @@ namespace PLUGIN_PACKAGE;
 class Logger {
 
 	/** @var array */
-	private $log;
+	private $log_entries = [];
 
 	/** @var array */
-	private $options;
-
-	/** @var array */
-	private $default_options;
+	private $options = [];
 
 	/** @var bool */
-	private $is_configured;
+	private $is_enabled = false;
 
-	/** @var int */
-	private $cookie_expiration_offset;
-
-	/** @var string */
-	private $cookie_path;
+	/** @var bool */
+	private $is_hydrated = false;
 
 	/** @var string */
-	private $cookie_name;
+	private $user_meta_key = "PLUGIN_FUNC_PREFIX_logger_options";
+
+	/** @var array */
+	private $default_user_options = [
+		"enabled" => false,
+
+		// 'console', 'file'
+		"log_to"  => [
+			"console" // js console
+		],
+		"php"     => [
+			"log_php_errors" => true,
+			"error_levels"   => [
+				E_ERROR
+			]
+		],
+		'file'    => [
+			// type can be either 'log' or 'html'
+			"type" => "html",
+			// the file extension is determined via the file_type
+			"name" => "PLUGIN_FUNC_PREFIX",
+			"dir"  => WP_CONTENT_DIR,
+		]
+	];
+
 
 	/** @var string */
 	public $logfile_separator; // public so that the parser can explode it
 
+	/** @var string[] */
+	private $php_exceptions = [
+		E_ERROR             => "E_ERROR",
+		E_WARNING           => "E_WARNING",
+		E_PARSE             => "E_PARSE",
+		E_NOTICE            => "E_NOTICE",
+		E_CORE_ERROR        => "E_CORE_ERROR",
+		E_CORE_WARNING      => "E_CORE_WARNING",
+		E_COMPILE_ERROR     => "E_COMPILE_ERROR",
+		E_COMPILE_WARNING   => "E_COMPILE_WARNING",
+		E_USER_ERROR        => "E_USER_ERROR",
+		E_USER_WARNING      => "E_USER_WARNING",
+		E_USER_NOTICE       => "E_USER_NOTICE",
+		E_STRICT            => "E_STRICT",
+		E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR",
+		E_DEPRECATED        => "E_DEPRECATED",
+		E_USER_DEPRECATED   => "E_USER_DEPRECATED",
+		E_ALL               => "E_ALL"
+	];
+
+	private $log_colors = [
+		'default' => 'dimgray',
+		'error'   => 'maroon',
+		'success' => 'forestgreen',
+		'info'    => 'dodgerblue',
+		'warn'    => 'darkorange'
+	];
+
 	function __construct() {
 
-		$this->is_configured            = false;
-		$this->options                  = array();
-		$this->log                      = array();
-		$this->cookie_expiration_offset = 60 * 60 * 24 * 30; // 30 days
-		$this->cookie_path              = "/";
-		$this->cookie_name              = "PLUGIN_FUNC_PREFIX_logger";
-
-		$this->default_options   = array(
-			"status"    => "enabled",
-			"type"      => "console", // either 'console' or 'file'
-			"file_name" => "PLUGIN_FUNC_PREFIX.log",
-			"file_dir"  => WP_CONTENT_DIR,
-		);
 		$this->logfile_separator = "----------------------------------------------";
 
-		// NOTE: Only setup the log tool if there is a debug cookie
-		if ( isset( $_COOKIE[ $this->cookie_name ] ) ) {
-			$this->configure();
-			if ( $this->is_configured && $this->options['type'] == "console" ) {
+		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( 'logger' ) ) {
+			return;
+		}
+
+		// Is the user already configured?
+		$this->hydrate();
+
+		if ( $this->is_enabled ) {
+			if ( $this->is_log_type_enabled( 'console' ) ) {
 				// Queue the console output to run in the footer
-				// TODO: Change to local method call [$this, 'method_name']
 				add_action( 'wp_footer', [ $this, "wp_action_output_console" ], 100 );
 				add_action( 'admin_footer', [ $this, "wp_action_output_console" ], 100 );
+			}
+
+			// Override the PHP error reporting
+			if ( $this->options['php']['log_php_errors'] == true ) {
+				error_reporting( E_ALL );
+				ini_set( "display_errors", 1 );
+				set_error_handler( [ $this, "php_error_handler" ] );
 			}
 		}
 	}
@@ -77,23 +120,70 @@ class Logger {
 		}
 	}
 
+	public function php_error_handler( $errno, $errstr, $errfile = "", $errline = "" ) {
+		$data           = [];
+		$data['source'] = 'php';
+		$msg            = "";
+		switch ( $errno ) {
+			case E_USER_ERROR:
+				echo "<h2>PLUGIN_NAME Error Handler</h2>";
+				echo "[$errno] $errstr<br />\n";
+				echo "  Fatal error on line $errline in file $errfile";
+				echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+				echo "<em>This error is appearing because you have enabled PLUGIN_NAME Logging.</em>";
+				exit( 1 );
+
+			case E_USER_WARNING:
+				$data['type'] = 'warn';
+				$msg          = "PHP Warning\n\n[$errno] $errstr\n\n";
+				break;
+
+			case E_USER_NOTICE:
+				$data['type'] = 'info';
+				$msg          = "PHP Notice\n\n[$errno] $errstr\n\n";
+				break;
+			case E_USER_DEPRECATED:
+				$data['type'] = 'log';
+				$msg          = "PHP Deprecated\n\n[$errno] $errstr\n\n";
+				break;
+			default:
+				$data['type'] = 'log';
+				$msg          = "PHP \n\n[$errno] $errstr\n\n";
+				break;
+		}
+		$data['args'][]      = $msg;
+		$this->log_entries[] = $data;
+	}
+
+	/**
+	 * If the first parameter is 'error' 'warn'
+	 * or 'info', that will set the type of
+	 * the log entry.
+	 *
+	 * @return void
+	 */
 	public function log() {
 
-		if ( ! $this->is_configured ) {
+		if ( ! $this->is_enabled ) {
 			return;
 		}
 
-		$logargs = func_get_args();
-
+		$logargs   = func_get_args();
 		$backtrace = debug_backtrace();
 
 		// Remove the mention of this function from the backtrace
-		array_shift( $backtrace );
+		$orig = array_shift( $backtrace );
 
-		$data              = array();
+		$data              = [];
 		$data['backtrace'] = print_r( $backtrace, true );
-		$data['args']      = array();
+		$data['args']      = [];
+		$data['type']      = 'log';
+		$data['source']    = 'user';
 
+
+		if ( in_array( $logargs[0], [ 'error', 'warn', 'info', 'log' ] ) ) {
+			$data['type'] = $logargs[0];
+		}
 		foreach ( $logargs as $arg ) {
 			if ( is_array( $arg ) ) {
 				$data['args'][] = print_r( $arg, true );
@@ -104,45 +194,30 @@ class Logger {
 			}
 		}
 
-		if ( ! isset( $this->log ) ) {
-			$this->log = array();
+		if ( ! isset( $this->log_entries ) ) {
+			$this->log_entries = array();
 		}
-		$this->log[] = $data;
+		$this->log_entries[] = $data;
 	}
 
 
 	/**
-	 * This is sort of weird.
-	 *
-	 * The cookie (ie PLUGIN_FUNC_PREFIX_logger) can be set to "enable"
-	 * on the client. This will automatically enable the
-	 * logger. This means that logging can be enabled *without* a constant.
+	 * Check user meta for logger settings.
 	 *
 	 * @return void
 	 */
-	private function configure() {
+	private function hydrate() {
+		$this->options    = [];
+		$this->is_enabled = false;
 
-		$this->options       = array();
-		$this->is_configured = false;
-		if ( isset( $_COOKIE[ $this->cookie_name ] ) ) {
-			if ( $_COOKIE[ $this->cookie_name ] == "start" || $_COOKIE[ $this->cookie_name ] == "enable" ) {
-				$this->turn_on_logging();
-			} else if ( $_COOKIE[ $this->cookie_name ] == "stop" || $_COOKIE[ $this->cookie_name ] == "disable" ) {
-				$this->turn_off_logging();
-			} else {
-				$cookie  = stripslashes( $_COOKIE[ $this->cookie_name ] );
-				$options = $this->parse_cookie( $cookie );
+		$user_meta = get_user_meta( get_current_user_id(), $this->user_meta_key );
 
-				// Validate that the options are set
-				foreach ( $this->default_options as $okey => $op ) {
-					if ( ! isset( $options[ $okey ] ) ) {
-						return;
-					}
-				}
-
-				if ( isset( $options['status'] ) && $options['status'] == "enabled" ) {
-					$this->options       = $options;
-					$this->is_configured = true;
+		if ( is_array( $user_meta ) ) {
+			if ( $this->are_options_valid( $user_meta ) ) {
+				$this->is_hydrated = true;
+				$this->options     = $user_meta;
+				if ( $this->options['enabled'] == true ) {
+					$this->is_enabled = true;
 				}
 			}
 		}
@@ -150,47 +225,65 @@ class Logger {
 
 
 	/**
+	 * @param $section
 	 * @param $key
 	 * @param $value
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function set_option( $key, $value ) {
-		$this->options[ $key ] = $value;
-		$this->setup_cookie_from_options();
+	public function set_option( $section, $key, $value ) {
+		if ( ! isset( $this->options[ $section ] ) || ! isset( $this->options[ $section ][ $key ] ) ) {
+			return false;
+		}
+		$this->options[ $section ][ $key ] = $value;
+		$this->_set_user_meta();
+
+		return true;
 	}
 
 	/**
-	 * Enable logging. Create and populate on the cookie.
-	 * @return void
-	 */
-	public function turn_on_logging() {
-		$this->options       = $this->default_options;
-		$this->is_configured = true;
-		$this->setup_cookie_from_options();
-	}
-
-	/**
-	 * Disable logging. Expire the cookie.
+	 * Enable logging with the default options.
 	 *
 	 * @return void
 	 */
-	public function turn_off_logging() {
-		$this->log           = array();
-		$this->options       = array();
-		$this->is_configured = false;
-		// Expire the cookie
-		$this->set_cookie( "", time() - $this->cookie_expiration_offset );
+	public function enable_user_logging() {
+		if ( ! $this->is_hydrated ) {
+			$this->options = $this->default_user_options;
+		}
+		$this->options['enabled'] = true;
+		$this->_set_user_meta();
 	}
 
-	private function setup_cookie_from_options() {
-		$expires = time() + $this->cookie_expiration_offset;
-		$cookie  = $this->encode_cookie( $this->options );
-		$this->set_cookie( $cookie, $expires );
+	/**
+	 * Disable logging. Keeps other options in meta.
+	 *
+	 * @return void
+	 */
+	public function disable_user_logging() {
+		$this->log_entries        = array();
+		$this->options['enabled'] = false;
+		$this->is_enabled         = false;
+		$this->_set_user_meta();
 	}
 
-	private function set_cookie( $cookie, $expires ) {
-		setcookie( $this->cookie_name, $cookie, $expires, $this->cookie_path );
+	/**
+	 * Reset logging options to defaults.
+	 *
+	 * @return void
+	 */
+	public function reset_user_logging() {
+		$this->log_entries = array();
+		$this->options     = $this->default_user_options;
+		$this->_set_user_meta();
+	}
+
+
+	private function _set_user_meta() {
+		add_user_meta( get_current_user_id(), $this->user_meta_key, $this->options, true );
+	}
+
+	private function _delete_user_meta() {
+		delete_user_meta( get_current_user_id(), $this->user_meta_key );
 	}
 
 	/**
@@ -204,22 +297,31 @@ class Logger {
 	 * @return string
 	 */
 	public function get_log_file_path() {
-		return $this->options['file_dir'] . "/" . $this->options['file_name'];
+		return $this->options['file']['dir'] . "/" . $this->options['file']['name'] . "." . $this->options['file']['type'];
 	}
 
 
 	/**
 	 * @return bool
 	 */
-	public function is_logging() {
-		return $this->is_configured;
+	public function is_logging(): bool {
+		// Only logged-in users have logging
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		return $this->is_enabled;
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function is_logging_to_file() {
-		return $this->is_configured && $this->options['type'] == 'file';
+		return $this->is_enabled && $this->is_log_type_enabled( 'file' );
+	}
+
+	public function is_log_type_enabled( $type ) {
+		return $this->is_enabled && isset( $this->options['log_to'] ) && in_array( $type, $this->options['log_to'] );
 	}
 
 	/**
@@ -229,64 +331,39 @@ class Logger {
 		return $this->options;
 	}
 
-	/**
-	 * Cookie data is stored as:
-	 *     option<>value|option2<>value2
-	 *
-	 * @param $cookie
-	 *
-	 * @return array
-	 */
-	private function parse_cookie( $cookie ) {
-		$parts   = explode( "|", $cookie );
-		$options = array();
-		foreach ( $parts as $part ) {
-			$opt                = explode( "<>", $part );
-			$options[ $opt[0] ] = $opt[1];
-		}
-
-		return $options;
-	}
-
-	/**
-	 *
-	 * Cookie data is stored as:
-	 *     option<>value|option2<>value2
-	 *
-	 * @param $options
-	 *
-	 * @return string
-	 */
-	private function encode_cookie( $options ) {
-		$parts = array();
-		foreach ( $options as $okey => $oval ) {
-			$parts[] = $okey . "<>" . $oval;
-		}
-
-		return implode( "|", $parts );
-	}
 
 	public function wp_action_output_console() {
 		?>
+
         <script>
             (function () {
                 // GIZMO LOGGING
                 console.log("%cPLUGIN_NAME Logging is Enabled.", "color:green;");
 				<?php
-				if(isset( $this->log )) {
-				foreach ($this->log as $idx=>$log) :
-				$title = preg_replace( '/\s+/', '', substr( $log['args'][0], 0, 80 ) );
+				if(is_array( $this->log_entries )) {
+				foreach ($this->log_entries as $idx=>$log) {
+				// Make the title of the group a bit prettier
+				$title = preg_replace( '/\v+/', '', substr( $log['args'][0], 0, 80 ) );
+				$style = "color:{$this->log_colors['default']}";
+				if ( isset( $colors[ $log['type'] ] ) ) {
+					$style = "color:" . $this->log_colors[ $log['type'] ];
+				}
 				?>
-                console.groupCollapsed(`<?="#" . $idx?>: <?=$title ?>...`);
+                console.groupCollapsed(`%c<?=$log['source'] . " " . $log['type'] . "#" . $idx?>: <?=$title ?>...`, '<?=$style?>');
+
 				<?php foreach ($log['args'] as $arg):?>
-                console.log(`<?=$arg?>`);
+                console['<?=$log['type']?>'](`<?=$arg?>`);
 				<?php endforeach;?>
+
+				<?php if(isset( $data['backtrace'] )):?>
                 console.groupCollapsed(`backtrace`);
                 console.log(`<?=$log['backtrace']?>`);
                 console.groupEnd();
+				<?php endif;?>
+
                 console.groupEnd();
 				<?php
-				endforeach;
+				}
 				}
 				?>
             })()
@@ -300,8 +377,8 @@ class Logger {
 			return;
 		}
 		$txt = "";
-		if ( isset( $this->log ) ) {
-			foreach ( $this->log as $log ) {
+		if ( isset( $this->log_entries ) ) {
+			foreach ( $this->log_entries as $log ) {
 				$txt .= PHP_EOL . $this->logfile_separator . PHP_EOL;
 				$txt .= "TIME: " . date( "F j, Y, g:i a" );
 				$txt .= PHP_EOL;
@@ -321,5 +398,37 @@ class Logger {
 	 */
 	public function get_log_file_contents() {
 		return file_get_contents( $this->get_log_file_path() );
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function get_php_exceptions() {
+		return $this->php_exceptions;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_php_exception_name( $exc ) {
+		return $this->php_exceptions[ $exc ];
+	}
+
+	/**
+	 * Test the keys and values of the default_options
+	 * exist in the $test
+	 *
+	 * @param $test Options to test
+	 *
+	 * @return bool
+	 */
+	public function are_options_valid( $test ) {
+		foreach ( $this->default_user_options as $dskey => $dsopt ) {
+			if ( ! isset( $test[ $dskey ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
