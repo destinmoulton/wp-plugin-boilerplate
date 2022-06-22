@@ -40,6 +40,9 @@ class Plugin {
 
 		// Define functions in functions.php
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
+
+		// Define globals
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
 	}
 
 	/**
@@ -49,10 +52,8 @@ class Plugin {
 		// WP Notices
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-notices.php" );
 
-
 		// Admin class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/class-admin.php" );
-
 
 		$admin = new Admin\Admin();
 		$admin->run();
