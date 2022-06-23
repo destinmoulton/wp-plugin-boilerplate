@@ -53,6 +53,9 @@ class Plugin {
 		// WP Notices
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-notices.php" );
 
+		// Form Class
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-form.php" );
+
 		// Admin class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/class-admin.php" );
 
