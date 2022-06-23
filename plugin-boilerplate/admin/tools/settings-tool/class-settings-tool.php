@@ -15,13 +15,14 @@ namespace PLUGIN_PACKAGE\Admin\Tools;
 use PLUGIN_PACKAGE\Settings;
 use \ValidFormBuilder;
 use \ValidFormBuilder\ValidForm;
-use const PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTINGS;
+use const PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTING_DEFAULTS;
 
 class SettingsTool extends AbstractAdminTool {
 	protected $title;
 	protected $slug = "settings-tool";
 	protected $description;
 	private $nonce_id;
+	private $fields;
 
 	protected function init() {
 		$this->title       = __( "Settings", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
@@ -29,7 +30,56 @@ class SettingsTool extends AbstractAdminTool {
 		$this->nonce_id    = "PLUGIN_FUNC_PREFIX_save_settings_form";
 
 		// Enqueue assets and require all the php files
-		$this->load_validformbuilder();
+		\PLUGIN_PACKAGE\Form::enqueue_and_require();
+
+
+		/**
+		 * The Settings Fields definition
+		 *
+		 * The array keys correlates with the settings defined above.
+		 *
+		 */
+		$this->fields = [
+			'bootstrap_onoff'  => [
+				'type'   => 'area',
+				'label'  => 'Load Bootstrap?',
+				'toggle' => true, // Whether this area is toggle-able
+				'fields' => [
+					'bootstrap_js_url'  => [
+						'type'  => ValidForm::VFORM_STRING,
+						'label' => 'Bootstrap JS CDN URL'
+					],
+					'bootstrap_css_url' => [
+						'type'  => ValidForm::VFORM_STRING,
+						'label' => 'Bootstrap CSS CDN URL'
+					]
+				]
+			],
+			'example_fieldset' => [
+				'type'   => 'fieldset',
+				'label'  => 'Test Fields',
+				'fields' => [
+					'test_select_box'     => [
+						'type'    => ValidForm::VFORM_SELECT_LIST,
+						'label'   => "Test Select Box",
+						'options' => [
+							'foo' => 'Foo',
+							'bar' => 'Bar',
+						]
+					],
+					'test_checkbox_group' => [
+						'type'    => ValidForm::VFORM_CHECK_LIST,
+						'label'   => "Test Checkboxes",
+						'options' => [
+							'red'   => 'Red',
+							'blue'  => 'Blue',
+							'green' => 'Green'
+						]
+					]
+				]
+			]
+
+		];
 	}
 
 	/**
@@ -37,7 +87,7 @@ class SettingsTool extends AbstractAdminTool {
 	 */
 	public function render() {
 
-		$form = $this->setup_form( Settings::get_all() );
+		$form = $this->setup_form();
 
 		$new_settings = [];
 		if ( isset( $_POST[ $this->nonce_id ] ) ) {
@@ -63,63 +113,19 @@ class SettingsTool extends AbstractAdminTool {
 	 *
 	 * @return ValidForm
 	 */
-	private function setup_form( $defaults ) {
-		$options = \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTING_OPTIONS;
-		$form    = new ValidForm( "cool_new_form", "Please fill out my cool form", $this->base_url );
+	private function setup_form() {
+		$values = \PLUGIN_PACKAGE\Settings::get_all();
 
-		// We will use wp csrf
-		$form->setUseCsrfProtection( false );
-		$form->addHiddenField( 'wp-nonce', ValidForm::VFORM_STRING );
-		$defaults['wp-nonce'] = wp_create_nonce( $this->nonce_id );
-
-		// ValidFormBuilder Basic Text Field
-		$form->addField(
-			'test_text_setting',
-			"A test setting.",
-			ValidForm::VFORM_STRING,
-			[
-				// Validation
-				'required' => true
-			],
-			[
-				// Error message for validation
-				'required' => __( "You must include a test setting value.", PLUGIN_CONST_PREFIX_TEXTDOMAIN )
-			]
+		$form = \PLUGIN_PACKAGE\Form::create(
+			"PLUGIN_FUNC_PREFIX_settings_form",
+			"PLUGIN_NAME Settings",
+			$this->base_url,
+			$this->nonce_id
 		);
 
-		// ValidFormBuilder Area to group fields
-		// http://validformbuilder.org/docs/classes/ValidFormBuilder.Area.html
-		// If you set the second parameter to true, the area has a checkbox to enable/disable all fields
-		$area = $form->addArea( 'API Connection Credentials', true, $defaults['test_api_group']['is_enabled'] );
-		$area->addField( 'api_endpoint', "API Endpoint", ValidForm::VFORM_STRING );
-		$area->addField( 'api_key', "API Key", ValidForm::VFORM_STRING );
-		$area->addField( 'api_secret', "API_SECRET", ValidForm::VFORM_PASSWORD );
-
-		// ValidFormBuilder Select dropdown
-		// http://validformbuilder.org/docs/classes/ValidFormBuilder.Select.html
-		$select = $form->addField( 'text_select_box', "Should this Foo or Bar?", ValidForm::VFORM_SELECT_LIST );
-		$this->build_field_group( $select, $options['test_select_box'], $defaults['test_select_box'] );
-
-		// ValidFormBuilder Group of Checkboxes
-		$checklist = $form->addField( 'test_checkbox_group', "Choose your colors:", ValidForm::VFORM_CHECK_LIST );
-		$this->build_field_group( $checklist, $options['test_checkbox_group'], $defaults['test_checkbox_group'] );
-
-		$form->setDefaults( $defaults );
+		$form = \PLUGIN_PACKAGE\Form::add_fields( $form, $this->fields, $values );
 
 		return $form;
 	}
 
-	/**
-	 * Build a select option group or a group of checkboxes
-	 *
-	 * @param $options Array of options
-	 * @param $selected The selected option
-	 *
-	 * @return void
-	 */
-	private function build_field_group( $group, $options, $selected ) {
-		foreach ( $options as $okey => $oval ) {
-			$group->addField( $oval, $okey );
-		}
-	}
 }

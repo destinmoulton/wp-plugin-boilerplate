@@ -12,6 +12,8 @@
 
 namespace PLUGIN_PACKAGE;
 
+use ValidFormBuilder\ValidForm;
+
 /**
  * Define the Settings
  *
@@ -34,35 +36,14 @@ namespace PLUGIN_PACKAGE;
  *
  * @const array[][]
  */
-const PLUGIN_CONST_PREFIX_SETTINGS = [
-	'test_text_setting'   => "This is a test setting.",
-	'test_api_group'      => [
-		'api_is_enabled' => false,
-		'api_endpoint'   => 'https://mytestserver.com/api/endpoint',
-		'api_key'        => '',
-		'api_secret'     => ''
-	],
-	'test_select_box'     => 'bar', // 'bar' will be the selected option (see OPTIONS below)
-	'test_checkbox_group' => 'blue'
+const PLUGIN_CONST_PREFIX_SETTING_DEFAULT_VALUES = [
+	'bootstrap_onoff'     => true,
+	'bootstrap_js_url'    => "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
+	'bootstrap_css_url'   => "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
+	'test_select_box'     => [ 'bar' ], // 'bar' will be the selected option (see OPTIONS below)
+	'test_checkbox_group' => [ 'blue' ]
 ];
 
-/**
- * Multi-option Settings
- *
- * The array key correlates with the settings defined above.
- *
- */
-const PLUGIN_CONST_PREFIX_SETTING_OPTIONS = [
-	'test_select_box'     => [
-		'foo' => 'Foo',
-		'bar' => 'Bar',
-	],
-	'test_checkbox_group' => [
-		'red'   => 'Red',
-		'blue'  => 'Blue',
-		'green' => 'Green'
-	]
-];
 
 /**
  * Permissions

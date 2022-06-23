@@ -36,52 +36,77 @@ class Form {
 		}
 	}
 
+	/**
+	 * @param $name
+	 * @param $title
+	 * @param $action
+	 * @param $nonce_id
+	 *
+	 * @return ValidForm
+	 */
+	public static function create( $name, $title, $action, $nonce_id ) {
+		$form = new ValidForm( $name, $title, $action );
+
+		return self::add_nonce( $form, $nonce_id );
+	}
+
+	/**
+	 * @param $form ValidForm
+	 * @param $nonce_id string
+	 *
+	 * @return ValidForm
+	 */
 	public static function add_nonce( $form, $nonce_id ) {
 		// Use wp csrf via nonce
 		$form->setUseCsrfProtection( false );
 		$form->addHiddenField( 'wp-nonce', ValidForm::VFORM_STRING );
 		$defaults['wp-nonce'] = wp_create_nonce( $nonce_id );
+
+		return $form;
 	}
 
 	/**
 	 * @param $form ValidForm
 	 * @param $fields array[] Multidimensional definition for form fields.
 	 *
-	 * @return void
+	 * @return ValidForm
 	 */
 	public static function add_fields( $form, $fields, $values ) {
 		foreach ( $fields as $fname => $field ) {
 			switch ( $field['type'] ) {
 				case 'area':
-					self::_area( $form, $fname, $field );
+					self::_area( $form, $fname, $field, $field['toggle'], $values[ $fname ] );
+					// Areas don't have default values
+					unset( $values[ $fname ] );
 					break;
 				case 'fieldset':
-					self::_fieldset( $form, $fname, $field );
+					self::_area( $form, $fname, $field, false, false );
 					break;
 				default:
 					self::_field( $form, $fname, $field );
 					break;
 			}
 		}
+		$form->setDefaults( $values );
+
+		return $form;
 	}
 
-	private static function _area( $form, $name, $def, $values ) {
-		$area = $form->addArea( $def['label'], $values[ $name ], $name, $values[ $name ] );
+	private static function _area( $form, $name, $def, $is_togglable, $value ) {
+		$area = $form->addArea( $def['label'], $is_togglable, $name, $value );
 		foreach ( $def['fields'] as $fname => $field ) {
 			self::_field( $area, $fname, $field );
 		}
 	}
 
-	private static function _fieldset( $form, $name, $def ) {
-		$header     = $def['header'] ?? "Fieldset";
-		$note       = $def['note'] ?? "";
-		$noteHeader = $def['note_header'] ?? "";
-		$fieldset   = $form->addFieldset( $header, $noteHeader, $note );
-		foreach ( $def['fields'] as $fname => $field ) {
-			self::_field( $fieldset, $fname, $field );
-		}
-	}
 
+	/**
+	 * @param $form_obj ValidForm
+	 * @param $name string
+	 * @param $def array
+	 *
+	 * @return void
+	 */
 	private static function _field( $form_obj, $name, $def ) {
 		$validation_rules  = $def['validation']['rules'] ?? [];
 		$validation_errors = $def['validation']['errors'] ?? [];

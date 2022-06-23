@@ -27,7 +27,7 @@ class Settings {
 	 */
 	public static function get_all() {
 
-		return get_option( self::$option_key, PLUGIN_CONST_PREFIX_SETTINGS );
+		return get_option( self::$option_key, PLUGIN_CONST_PREFIX_SETTING_DEFAULT_VALUES );
 	}
 
 	/**

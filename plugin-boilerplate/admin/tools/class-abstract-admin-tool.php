@@ -18,6 +18,8 @@ abstract class AbstractAdminTool {
 	protected $description;
 	/** @var array */
 	protected $partials;
+	/** @var array */
+	protected $tabs;
 
 	public function __construct() {
 		// Initialize the uri_slug using the plugin slug
@@ -153,6 +155,20 @@ abstract class AbstractAdminTool {
 	}
 
 	/**
+	 * @param $name
+	 * @param $slug
+	 *
+	 * @return void
+	 */
+	private function add_tab( $name, $slug, $func ) {
+		$this->tabs[] = [
+			'name'   => $name,
+			'slug'   => $slug,
+			'method' => $func
+		];
+	}
+
+	/**
 	 * @return string
 	 */
 	public function get_path() {
@@ -172,20 +188,5 @@ abstract class AbstractAdminTool {
 	 * @return void
 	 */
 	protected function load_validformbuilder() {
-		wp_enqueue_script( "PLUGIN_FUNC_PREFIX-validform-js", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "lib/validformbuilder/js/validform.js", [], "1" );
-		wp_enqueue_style( "PLUGIN_FUNC_PREFIX-validform-css", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "lib/validformbuilder/css/validform.css", [], "1" );
-
-		$path = PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "lib/validformbuilder/classes/ValidFormBuilder";
-		require_once( $path . "/ClassDynamic.php" );
-		require_once( $path . "/Base.php" );
-		require_once( $path . "/Area.php" );
-		require_once( $path . "/Element.php" );
-		$files = scandir( $path );
-
-		foreach ( $files as $file ) {
-			if ( ! in_array( $file, [ '.', '..' ] ) ) {
-				require_once( $path . "/" . $file );
-			}
-		}
 	}
 }
