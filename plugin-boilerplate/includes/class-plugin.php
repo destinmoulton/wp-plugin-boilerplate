@@ -29,11 +29,11 @@ class Plugin {
 	 * @return void
 	 */
 	private static function require_primary() {
+		// Constants are configured in constants.php
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/constants.php" );
+
 		// Logger class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
-
-		// Settings are configured in constants.php
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/constants.php" );
 
 		// The Settings class with static methods
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-settings.php" );
@@ -42,7 +42,8 @@ class Plugin {
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
 
 		// Define globals
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
+		// Globals might rely on the above features
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/globals.php" );
 	}
 
 	/**

@@ -122,6 +122,4 @@ class SettingsTool extends AbstractAdminTool {
 			$group->addField( $oval, $okey );
 		}
 	}
-
-
 }

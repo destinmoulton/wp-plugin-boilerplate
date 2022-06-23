@@ -129,7 +129,8 @@ abstract class AbstractAdminTool {
 			return;
 		}
 		wp_redirect( $url );
-		exit();
+		print_r( 'redirecting' );
+		exit;
 	}
 
 	/**

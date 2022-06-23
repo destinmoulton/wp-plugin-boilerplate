@@ -71,7 +71,7 @@ const PLUGIN_CONST_PREFIX_SETTING_OPTIONS = [
  */
 const PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS = [
 	// General Features
-	'logging'       => PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY,
+	'logger'        => PLUGIN_CONST_PREFIX_MIN_ADMIN_CAPABILITY,
 
 	// Tools
 	// The default-tool permission will be used for undefined tools

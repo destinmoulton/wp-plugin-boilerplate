@@ -12,6 +12,7 @@ use PLUGIN_PACKAGE\Admin;
 /** @var $logger_is_running bool */
 /** @var $is_logging_to_file bool */
 /** @var $log_file_path bool */
+/** @var $form_html string */
 ?>
 
 <h1><?= $TOOL_INFO['title'] ?></h1>
@@ -20,6 +21,9 @@ use PLUGIN_PACKAGE\Admin;
     <fieldset style="border:1px solid gray; padding: .4rem;">
         <legend>Options</legend>
         <ul>
+            <li>
+                <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'reset_logging' ] ) ?>"><?= __( "Reset Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
+            </li>
 			<?php if ( $logger_is_running ): ?>
                 <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'disable_logging' ] ) ?>"><?= __( "Turn Off Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
@@ -31,13 +35,6 @@ use PLUGIN_PACKAGE\Admin;
                     <li>
                         <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'clear_file_log' ] ) ?>"><?= __( "Clear The File Log", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                     </li>
-                    <li>
-                        <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'log_to_console' ] ) ?>"><?= __( "Switch to Console Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
-                    </li>
-				<?php else: ?>
-                    <li>
-                        <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'log_to_file' ] ) ?>"><?= __( "Switch to File Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
-                    </li>
 				<?php endif; ?>
 			<?php else: ?>
                 <li>
@@ -47,4 +44,9 @@ use PLUGIN_PACKAGE\Admin;
         </ul>
     </fieldset>
 
+	<?php if ( $logger_is_running ): ?>
+        <div>
+			<?= $form_html ?>
+        </div>
+	<?php endif; ?>
 </div>

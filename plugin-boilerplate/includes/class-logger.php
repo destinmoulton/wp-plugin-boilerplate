@@ -34,16 +34,16 @@ class Logger {
 
 	/** @var array */
 	private $default_user_options = [
-		"enabled" => false,
+		"enabled" => 0,
 
 		// 'console', 'file'
 		"log_to"  => [
 			"console" // js console
 		],
 		"php"     => [
-			"log_php_errors" => true,
-			"error_levels"   => [
-				E_ERROR
+			"log_php_errors"  => 1,
+			"error_reporting" => [
+				"E_ERROR"
 			]
 		],
 		'file'    => [
@@ -76,8 +76,11 @@ class Logger {
 		E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR",
 		E_DEPRECATED        => "E_DEPRECATED",
 		E_USER_DEPRECATED   => "E_USER_DEPRECATED",
-		E_ALL               => "E_ALL"
 	];
+
+
+	/** @var int[] */
+	private $user_allowed_php_errors = [];
 
 	private $log_colors = [
 		'default' => 'dimgray',
@@ -106,7 +109,7 @@ class Logger {
 			}
 
 			// Override the PHP error reporting
-			if ( $this->options['php']['log_php_errors'] == true ) {
+			if ( $this->options['php']['log_php_errors'] == 1 ) {
 				error_reporting( E_ALL );
 				ini_set( "display_errors", 1 );
 				set_error_handler( [ $this, "php_error_handler" ] );
@@ -124,6 +127,12 @@ class Logger {
 		$data           = [];
 		$data['source'] = 'php';
 		$msg            = "";
+
+		// Is this error type enabled by the user?
+		if ( ! in_array( $errno, $this->user_allowed_php_errors ) ) {
+			return;
+		}
+
 		switch ( $errno ) {
 			case E_USER_ERROR:
 				echo "<h2>PLUGIN_NAME Error Handler</h2>";
@@ -210,16 +219,24 @@ class Logger {
 		$this->options    = [];
 		$this->is_enabled = false;
 
-		$user_meta = get_user_meta( get_current_user_id(), $this->user_meta_key );
+		$user_meta = $this->_get_user_meta();
 
 		if ( is_array( $user_meta ) ) {
 			if ( $this->are_options_valid( $user_meta ) ) {
 				$this->is_hydrated = true;
 				$this->options     = $user_meta;
-				if ( $this->options['enabled'] == true ) {
+				if ( $this->options['enabled'] == 1 ) {
 					$this->is_enabled = true;
 				}
+
+				if ( $this->options['php']['log_php_errors'] == 1 ) {
+					// Convert the allowed PHP errors into a local array
+					foreach ( $this->options['php']['error_reporting'] as $excstr ) {
+						$this->user_allowed_php_errors[] = constant( $excstr );
+					}
+				}
 			}
+
 		}
 	}
 
@@ -261,11 +278,22 @@ class Logger {
 	 * @return void
 	 */
 	public function enable_user_logging() {
-		if ( ! $this->is_hydrated ) {
-			$this->options = $this->default_user_options;
+		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( 'logger' ) ) {
+			return;
 		}
-		$this->options['enabled'] = true;
+		if ( ! $this->is_hydrated ) {
+			$this->hydrate();
+
+			if ( ! $this->is_hydrated ) {
+				// No user meta found/hydrated
+				$this->options = $this->default_user_options;
+			}
+		}
+
+		$this->is_enabled         = true;
+		$this->options['enabled'] = 1;
 		$this->_set_user_meta();
+		$this->is_hydrated = true;
 	}
 
 	/**
@@ -275,7 +303,7 @@ class Logger {
 	 */
 	public function disable_user_logging() {
 		$this->log_entries        = array();
-		$this->options['enabled'] = false;
+		$this->options['enabled'] = 0;
 		$this->is_enabled         = false;
 		$this->_set_user_meta();
 	}
@@ -291,9 +319,22 @@ class Logger {
 		$this->_set_user_meta();
 	}
 
+	private function _get_user_meta() {
+		$meta = get_user_meta( get_current_user_id(), $this->user_meta_key );
+		if ( is_array( $meta ) ) {
+			return $meta[0];
+		}
+
+		return [];
+	}
 
 	private function _set_user_meta() {
-		add_user_meta( get_current_user_id(), $this->user_meta_key, $this->options, true );
+		$meta = $this->_get_user_meta();
+		if ( is_array( $meta ) && isset( $meta['enabled'] ) ) {
+			update_user_meta( get_current_user_id(), $this->user_meta_key, $this->options );
+		} else {
+			add_user_meta( get_current_user_id(), $this->user_meta_key, $this->options, true );
+		}
 	}
 
 	private function _delete_user_meta() {
@@ -319,11 +360,6 @@ class Logger {
 	 * @return bool
 	 */
 	public function is_logging(): bool {
-		// Only logged-in users have logging
-		if ( ! is_user_logged_in() ) {
-			return false;
-		}
-
 		return $this->is_enabled;
 	}
 
@@ -444,5 +480,9 @@ class Logger {
 		}
 
 		return true;
+	}
+
+	public function get_default_options() {
+		return $this->default_user_options;
 	}
 }
