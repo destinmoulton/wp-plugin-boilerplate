@@ -23,6 +23,7 @@ class SettingsTool extends AbstractAdminTool {
 	protected $description;
 	private $nonce_id;
 	private $fields;
+	private $form;
 
 	protected function init() {
 		$this->title       = __( "Settings", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
@@ -40,7 +41,7 @@ class SettingsTool extends AbstractAdminTool {
 		 *
 		 */
 		$this->fields = [
-			'bootstrap_onoff'  => [
+			'bootstrap_enabled' => [
 				'type'   => 'area',
 				'label'  => 'Load Bootstrap?',
 				'toggle' => true, // Whether this area is toggle-able
@@ -55,7 +56,7 @@ class SettingsTool extends AbstractAdminTool {
 					]
 				]
 			],
-			'example_fieldset' => [
+			'example_fieldset'  => [
 				'type'   => 'fieldset',
 				'label'  => 'Test Fields',
 				'fields' => [
@@ -80,30 +81,29 @@ class SettingsTool extends AbstractAdminTool {
 			]
 
 		];
+
+		$this->form = $this->setup_form();
+		$this->actions();
+	}
+
+	private function actions() {
+		if ( isset( $_GET['action'] ) ) {
+			if ( $_GET['action'] == 'submit' ) {
+				if ( \PLUGIN_PACKAGE\Form::is_submitted_and_valid( $this->form, $this->nonce_id ) ) {
+					$values = \PLUGIN_PACKAGE\Form::get_submitted_values( $this->form, $this->fields, \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_SETTING_DEFAULT_VALUES, \PLUGIN_PACKAGE\Settings::get_all() );
+					\PLUGIN_PACKAGE\Settings::set_all( $values );
+					$this->redirect( $this->base_url );
+				}
+			}
+		}
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function render() {
-
-		$form = $this->setup_form();
-
-		$new_settings = [];
-		if ( isset( $_POST[ $this->nonce_id ] ) ) {
-			if ( wp_verify_nonce( $_POST[ $this->nonce_id ], $this->nonce_id ) ) {
-//				if ( $form->isValid() && $form->isSubmitted() ) {
-//
-//					foreach ( PLUGIN_CONST_PREFIX_SETTINGS as $skey => $sval ) {
-//						$new_settings = $form->getValidField( $skey )->getValue();
-//
-//					}
-//					print_r( $new_settings );
-//				}
-			}
-		}
 		$pvars = [
-			'form_html' => $form->toHtml()
+			'form_html' => $this->form->toHtml()
 		];
 		$this->add_partial( plugin_dir_path( __FILE__ ) . "partials/settings-form.partial.php", $pvars );
 	}
@@ -119,11 +119,12 @@ class SettingsTool extends AbstractAdminTool {
 		$form = \PLUGIN_PACKAGE\Form::create(
 			"PLUGIN_FUNC_PREFIX_settings_form",
 			"PLUGIN_NAME Settings",
-			$this->base_url,
+			$this->base_url . "&action=submit",
+			$this->fields,
+			$values,
 			$this->nonce_id
 		);
 
-		$form = \PLUGIN_PACKAGE\Form::add_fields( $form, $this->fields, $values );
 
 		return $form;
 	}

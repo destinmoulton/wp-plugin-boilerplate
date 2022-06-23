@@ -37,7 +37,7 @@ use ValidFormBuilder\ValidForm;
  * @const array[][]
  */
 const PLUGIN_CONST_PREFIX_SETTING_DEFAULT_VALUES = [
-	'bootstrap_onoff'     => true,
+	'bootstrap_enabled'   => true,
 	'bootstrap_js_url'    => "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js",
 	'bootstrap_css_url'   => "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css",
 	'test_select_box'     => [ 'bar' ], // 'bar' will be the selected option (see OPTIONS below)

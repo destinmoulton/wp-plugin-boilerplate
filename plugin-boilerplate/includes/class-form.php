@@ -44,10 +44,51 @@ class Form {
 	 *
 	 * @return ValidForm
 	 */
-	public static function create( $name, $title, $action, $nonce_id ) {
+	public static function create( $name, $title, $action, $fields, $values, $nonce_id ) {
 		$form = new ValidForm( $name, $title, $action );
 
-		return self::add_nonce( $form, $nonce_id );
+		$values = self::add_nonce( $form, $nonce_id, $values );
+
+		return self::add_fields( $form, $fields, $values );
+	}
+
+	public static function is_submitted_and_valid( $form, $nonce_id ) {
+		if ( ! isset( $_POST['wp-nonce'] ) ) {
+			return false;
+		}
+		if ( ! $form->isSubmitted() ) {
+			return false;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wp-nonce'], $nonce_id ) ) {
+			return false;
+		}
+
+		return $form->isValid();
+	}
+
+	public static function get_submitted_values( $form, $fields, $defaults, $old_values ) {
+		$values = [];
+		foreach ( $defaults as $fname => $fval ) {
+			$value            = $form->getValidField( $fname )->getValue();
+			$values[ $fname ] = $value;
+		}
+
+		// Clear up any issues with the area block
+		// The above call will set child fields to null
+		// if the area checkbox is unchecked
+		foreach ( $fields as $fname => $field ) {
+			if ( $field['type'] == "area" && $values[ $fname ] == false ) {
+				foreach ( $field['fields'] as $afkey => $afval ) {
+					if ( $values[ $afkey ] == null ) {
+						// Don't store null; replace with the old values
+						$values[ $afkey ] = $old_values[ $afkey ];
+					}
+				}
+			}
+		}
+
+		return $values;
 	}
 
 	/**
@@ -56,13 +97,13 @@ class Form {
 	 *
 	 * @return ValidForm
 	 */
-	public static function add_nonce( $form, $nonce_id ) {
+	public static function add_nonce( $form, $nonce_id, $field_values ) {
 		// Use wp csrf via nonce
 		$form->setUseCsrfProtection( false );
 		$form->addHiddenField( 'wp-nonce', ValidForm::VFORM_STRING );
-		$defaults['wp-nonce'] = wp_create_nonce( $nonce_id );
+		$field_values['wp-nonce'] = wp_create_nonce( $nonce_id );
 
-		return $form;
+		return $field_values;
 	}
 
 	/**
