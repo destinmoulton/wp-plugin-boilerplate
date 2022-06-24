@@ -15,7 +15,6 @@ use PLUGIN_PACKAGE\Admin;
 /** @var $form_html string */
 ?>
 
-<h1><?= $TOOL_INFO['title'] ?></h1>
 <div>
     <h3>Status: <?= $logger_is_running ? "Logging Enabled" : "Logging Disabled" ?></h3>
     <fieldset style="border:1px solid gray; padding: .4rem;">

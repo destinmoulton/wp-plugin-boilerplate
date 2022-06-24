@@ -19,13 +19,33 @@ abstract class AbstractAdminTool {
 	/** @var array */
 	protected $partials;
 	/** @var array */
-	protected $tabs;
+	protected $tabs = [];
+	/** @var string */
+	protected $active_tab_slug = "";
 
 	public function __construct() {
 		// Initialize the uri_slug using the plugin slug
 		$this->uri_slug = PLUGIN_CONST_PREFIX_SLUG . "-" . $this->slug;
 		$this->base_url = admin_url( 'admin.php?' . http_build_query( [ 'page' => $this->uri_slug ] ) );
+
+		// Init before enqueue
 		$this->init();
+
+		if ( $this->is_active() ) {
+			// Enqueue only if this tool is running
+			// so that other admin sections aren't
+			// changed or burdened by the enqueues
+			$this->enqueue();
+		}
+	}
+
+	/**
+	 * @return void
+	 */
+	protected function enqueue() {
+		$settings = \PLUGIN_PACKAGE\Settings::get_all();
+		wp_enqueue_script( "PLUGIN_SLUG-bootstrap-js", $settings['bootstrap_js_url'], [], "5.0.2" );
+		wp_enqueue_style( "PLUGIN_SLUG-bootstrap-css", $settings['bootstrap_css_url'], [], "5.0.2" );
 	}
 
 	/**
@@ -41,7 +61,11 @@ abstract class AbstractAdminTool {
 	 */
 	public function run() {
 		// Add the admin header partial first
-		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-header.partial.php" );
+		$hdata = [
+			'tabs'            => $this->tabs,
+			'active_tab_slug' => $this->active_tab_slug
+		];
+		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-header.partial.php", $hdata );
 		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( $this->slug ) ) {
 			// Don't render without permissions
 			\PLUGIN_PACKAGE\Notices::error( "You do not have permissions to access this." );
@@ -154,15 +178,16 @@ abstract class AbstractAdminTool {
 	}
 
 	/**
-	 * @param $name
+	 * @param $title
 	 * @param $slug
+	 * @param $func array ie [$this, "tab_method"]
 	 *
 	 * @return void
 	 */
-	private function add_tab( $name, $slug, $func ) {
+	protected function add_tab( $slug, $title, $func ) {
 		$this->tabs[] = [
-			'name'   => $name,
 			'slug'   => $slug,
+			'title'  => $title,
 			'method' => $func
 		];
 	}
@@ -180,12 +205,49 @@ abstract class AbstractAdminTool {
 	abstract public function render();
 
 
+	protected function route_tabs() {
+		if ( ! isset( $this->tabs[0] ) ) {
+			return;
+		}
+		// Default tab is first
+		$tab = $this->tabs[0];
+		if ( isset( $_GET['tab'] ) ) {
+			$t = $this->get_tab( $_GET['tab'] );
+			if ( isset( $t['slug'] ) ) {
+				$tab                   = $t;
+				$this->active_tab_slug = $t['slug'];
+			}
+		}
+		call_user_func( $tab['method'] );
+	}
+
+
 	/**
-	 * Load ValidFormBuilder Library
+	 * Get a tab by its slug
 	 *
-	 * Useful for making forms in tools.
-	 * @return void
+	 * @param $tab_slug string
+	 *
+	 * @return array
 	 */
-	protected function load_validformbuilder() {
+	protected function get_tab( $tab_slug ) {
+		foreach ( $this->tabs as $tab ) {
+			if ( $tab['slug'] == $tab_slug ) {
+				return $tab;
+			}
+		}
+
+		return [];
+	}
+
+	protected function is_active() {
+		if ( ! isset( $_GET['page'] ) ) {
+			return false;
+		}
+		if ( $_GET['page'] == $this->uri_slug ) {
+
+			return true;
+		}
+
+		return false;
 	}
 }

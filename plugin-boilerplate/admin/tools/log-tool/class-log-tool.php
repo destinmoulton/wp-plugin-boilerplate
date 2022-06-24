@@ -1,4 +1,4 @@
-<?php /** @noinspection SpellCheckingInspection */
+<?php
 
 /**
  * The Debugger Tool
@@ -23,6 +23,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class LogTool extends AbstractAdminTool {
 	protected $slug = "log-tool";
+	protected $tabs = [];
 
 	private $should_js_redirect = false;
 
@@ -32,10 +33,23 @@ class LogTool extends AbstractAdminTool {
 		$this->title       = __( "Log Tool", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 		$this->description = __( "Simple debugging via console or log file.", PLUGIN_CONST_PREFIX_TEXTDOMAIN );
 
-		// Load ValidFormBuilder
-		$this->load_validformbuilder();
+		$this->add_tab(
+			'settings',
+			__( 'Log Settings', PLUGIN_CONST_PREFIX_TEXTDOMAIN ),
+			[ $this, "tab_settings" ]
+		);
+		$this->add_tab(
+			'logfile',
+			__( 'Log File', PLUGIN_CONST_PREFIX_TEXTDOMAIN ),
+			[ $this, "tab_logfile" ]
+		);
 
-		// These actions must be up here for redirection
+		if ( $this->is_active() ) {
+			$this->actions();
+		}
+	}
+
+	private function actions() {
 		if ( isset( $_GET["action"] ) ) {
 			switch ( $_GET["action"] ) {
 				case "enable_logging":
@@ -57,7 +71,10 @@ class LogTool extends AbstractAdminTool {
 	}
 
 	public function render() {
-		/** @var \PLUGIN_PACKAGE\Logger $PLUGIN_FUNC_PREFIX_logger */
+		$this->route_tabs();
+	}
+
+	public function tab_settings() {
 		global $PLUGIN_FUNC_PREFIX_logger;
 		$form = $this->build_settings_form();
 		if ( isset( $_GET["action"] ) ) {
@@ -66,12 +83,10 @@ class LogTool extends AbstractAdminTool {
 					\PLUGIN_FUNC_PREFIX_log( array( "test" => PLUGIN_CONST_PREFIX_NAME . " :: This is a test!" ) );
 					break;
 				case "clear_file_log":
-					// Clear the log
-					file_put_contents( $PLUGIN_FUNC_PREFIX_logger->get_log_file_path(), "" );
+					$PLUGIN_FUNC_PREFIX_logger->clear_log_file();
 					break;
 				case "process_form":
 					$this->save_log_settings( $form );
-
 					break;
 				default:
 					break;
@@ -86,17 +101,17 @@ class LogTool extends AbstractAdminTool {
 		if ( $PLUGIN_FUNC_PREFIX_logger->is_logging() ) {
 			$pdata['form_html'] = $form->toHtml();
 		}
-		print_r( $PLUGIN_FUNC_PREFIX_logger->get_options() );
 		$this->add_partial( $this->get_path() . "partials/log-tool-options.partial.php", $pdata );
 
+	}
 
-		if ( $pdata['is_logging_to_file'] ) {
-			$logfile_path             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
-			$logfile_contents         = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
-			$pdata['logfile_path']    = $logfile_path;
-			$pdata['logfile_entries'] = explode( $PLUGIN_FUNC_PREFIX_logger->logfile_separator, $logfile_contents );
-			$this->add_partial( $this->get_path() . "partials/log-file.partial.php", $pdata );
-		}
+	private function tab_logfile() {
+		global $PLUGIN_FUNC_PREFIX_logger;
+		$logfile_path             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
+		$logfile_contents         = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
+		$pdata['logfile_path']    = $logfile_path;
+		$pdata['logfile_entries'] = explode( $PLUGIN_FUNC_PREFIX_logger->logfile_separator, $logfile_contents );
+		$this->add_partial( $this->get_path() . "partials/log-file.partial.php", $pdata );
 	}
 
 	private function build_settings_form() {
@@ -106,7 +121,6 @@ class LogTool extends AbstractAdminTool {
 			$prefix  = 'log_tool_';
 			$form    = new ValidForm( $prefix . "_options", "Logging Options", $this->base_url . "&action=process_form" );
 
-			var_dump( $_POST );
 			// We will use wp csrf
 			$form->setUseCsrfProtection( false );
 			$form->addHiddenField( 'wp-nonce', ValidForm::VFORM_STRING );
@@ -172,8 +186,6 @@ class LogTool extends AbstractAdminTool {
 
 			$new['php']['error_reporting'] = $_POST['php_error_levels'];
 		}
-		var_dump( $_POST['php_error_levels'] );
-		var_dump( $new );
 		exit();
 	}
 

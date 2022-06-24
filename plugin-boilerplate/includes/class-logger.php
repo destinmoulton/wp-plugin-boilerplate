@@ -485,4 +485,9 @@ class Logger {
 	public function get_default_options() {
 		return $this->default_user_options;
 	}
+
+	public function clear_log_file() {
+		// Clear the log
+		file_put_contents( $this->get_log_file_path(), "" );
+	}
 }
