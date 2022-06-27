@@ -105,7 +105,7 @@ class LogTool extends AbstractAdminTool {
 
 	}
 
-	private function tab_logfile() {
+	public function tab_logfile() {
 		global $PLUGIN_FUNC_PREFIX_logger;
 		$logfile_path             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
 		$logfile_contents         = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();

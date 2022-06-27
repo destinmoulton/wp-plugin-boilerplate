@@ -12,7 +12,7 @@
 <p>
     <em><?= $logfile_path ?></em>
 </p>
-<ul class="">
+<ul class="bg-white">
 	<?php
 	foreach ( $logfile_entries as $entry ) {
 		echo "<li>";

@@ -43,9 +43,7 @@ abstract class AbstractAdminTool {
 	 * @return void
 	 */
 	protected function enqueue() {
-		$settings = \PLUGIN_PACKAGE\Settings::get_all();
-		wp_enqueue_script( "PLUGIN_SLUG-bootstrap-js", $settings['bootstrap_js_url'], [], "5.0.2" );
-		wp_enqueue_style( "PLUGIN_SLUG-bootstrap-css", $settings['bootstrap_css_url'], [], "5.0.2" );
+		wp_enqueue_style( "PLUGIN_SLUG-admin-css", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "/assets/admin.css", [], PLUGIN_CONST_PREFIX_VERSION );
 	}
 
 	/**
@@ -65,6 +63,7 @@ abstract class AbstractAdminTool {
 			'tabs'            => $this->tabs,
 			'active_tab_slug' => $this->active_tab_slug
 		];
+		// header
 		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-header.partial.php", $hdata );
 		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( $this->slug ) ) {
 			// Don't render without permissions
@@ -72,6 +71,8 @@ abstract class AbstractAdminTool {
 		} else {
 			$this->render();
 		}
+		// footer
+		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-footer.partial.php", $hdata );
 		$this->display_partials();
 	}
 
@@ -126,11 +127,12 @@ abstract class AbstractAdminTool {
 			// Make tool information available to every
 			// template partial
 			$TOOL_INFO = [
-				'title'       => $this->title,
-				'description' => $this->description,
-				'slug'        => $this->slug,
-				'uri_slug'    => $this->uri_slug,
-				'base_url'    => $this->base_url,
+				'title'           => $this->title,
+				'description'     => $this->description,
+				'slug'            => $this->slug,
+				'uri_slug'        => $this->uri_slug,
+				'base_url'        => $this->base_url,
+				'active_tab_slug' => $this->active_tab_slug
 			];
 			require $part['partial'];
 		}
@@ -210,7 +212,8 @@ abstract class AbstractAdminTool {
 			return;
 		}
 		// Default tab is first
-		$tab = $this->tabs[0];
+		$tab                   = $this->tabs[0];
+		$this->active_tab_slug = $tab['slug'];
 		if ( isset( $_GET['tab'] ) ) {
 			$t = $this->get_tab( $_GET['tab'] );
 			if ( isset( $t['slug'] ) ) {
