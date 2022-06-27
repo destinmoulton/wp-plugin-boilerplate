@@ -17,15 +17,15 @@
 /** @var $tabs array */
 ?>
 <div class="PLUGIN_FUNC_PREFIX-tool-container">
-    <div class="container">
-        <h1 class="tool-title">PLUGIN_NAME <?= $TOOL_INFO['title'] ?></h1>
+    <div>
+        <h1 class="tool-title">PLUGIN_NAME &gt; <?= $TOOL_INFO['title'] ?></h1>
         <div>
 			<?= \PLUGIN_PACKAGE\Notices::display_all() ?>
         </div>
     </div>
-    <div class="container">
+    <div>
 		<?php if ( count( $tabs ) > 0 ): ?>
-            <ul class="nav nav-tabs">
+            <ul class="tab-bar">
 				<?php foreach ( $tabs as $tab ): ?>
 					<?php
 					$aria   = '';
@@ -35,11 +35,12 @@
 						$active = 'active';
 					}
 					?>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $active ?>"
-							<?= $aria ?>
-                           href="<?= $TOOL_INFO['base_url'] . "&tab=" . $tab['slug'] ?>"><?= $tab['title'] ?></a>
+                    <li class="tab <?= $active ?>">
+                        <a <?= $aria ?>
+                                href="<?= $TOOL_INFO['base_url'] . "&tab=" . $tab['slug'] ?>"><?= $tab['title'] ?></a>
                     </li>
+                    <li class="tab-gutter"></li>
 				<?php endforeach; ?>
             </ul>
 		<?php endif; ?>
+        <div class="content">
