@@ -59,10 +59,21 @@ abstract class AbstractAdminTool {
 	 */
 	public function run() {
 		// Add the admin header partial first
-		$hdata = [
-			'tabs'            => $this->tabs,
-			'active_tab_slug' => $this->active_tab_slug
-		];
+		if ( count( $this->tabs ) > 0 ) {
+			$hdata = [
+				'tabs'            => $this->tabs,
+				'active_tab_slug' => $this->active_tab_slug
+			];
+		} else {
+			// Make the current page into the tab
+			$this->active_tab_slug = $this->uri_slug;
+			$hdata                 = [
+				'tabs'            => [
+					[ 'slug' => $this->uri_slug, 'title' => $this->title ]
+				],
+				'active_tab_slug' => $this->uri_slug
+			];
+		}
 		// header
 		$this->add_partial( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "admin/partials/admin-header.partial.php", $hdata );
 		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( $this->slug ) ) {

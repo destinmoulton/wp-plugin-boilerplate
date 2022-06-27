@@ -35,12 +35,15 @@
 						$active = 'active';
 					}
 					?>
-                    <li class="tab <?= $active ?>">
-                        <a <?= $aria ?>
-                                href="<?= $TOOL_INFO['base_url'] . "&tab=" . $tab['slug'] ?>"><?= $tab['title'] ?></a>
+                    <li class="tab <?= $active ?>" <?= $aria ?>>
+						<?php if ( $active == 'active' ): ?>
+                            <span><?= $tab['title'] ?></span>
+						<?php else: ?>
+                            <a href="<?= $TOOL_INFO['base_url'] . "&tab=" . $tab['slug'] ?>"><?= $tab['title'] ?></a>
+						<?php endif; ?>
                     </li>
                     <li class="tab-gutter"></li>
 				<?php endforeach; ?>
             </ul>
 		<?php endif; ?>
-        <div class="content">
+        <div class="PLUGIN_FUNC_PREFIX-tool-content">

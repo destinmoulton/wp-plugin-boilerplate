@@ -17,26 +17,26 @@ use PLUGIN_PACKAGE\Admin;
 
 <div>
     <h3>Status: <?= $logger_is_running ? "Logging Enabled" : "Logging Disabled" ?></h3>
-    <div class="bg-white border rounded-1 p-2">
-        <h5>Options</h5>
-        <ul class="list-group">
-            <li class="list-group-item">
+    <div class="card">
+        <h4>Options</h4>
+        <ul>
+            <li>
                 <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'reset_logging' ] ) ?>"><?= __( "Reset Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
             </li>
 			<?php if ( $logger_is_running ): ?>
-                <li class="list-group-item">
+                <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'disable_logging' ] ) ?>"><?= __( "Turn Off Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
-                <li class="list-group-item">
+                <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'test_logging' ] ) ?>"><?= __( "Invoke a Test Log Message", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
 				<?php if ( $is_logging_to_file ): ?>
-                    <li class="list-group-item">
+                    <li>
                         <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'clear_file_log' ] ) ?>"><?= __( "Clear The File Log", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                     </li>
 				<?php endif; ?>
 			<?php else: ?>
-                <li class="list-group-item">
+                <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'enable_logging' ] ) ?>"><?= __( "Enable Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
 			<?php endif; ?>

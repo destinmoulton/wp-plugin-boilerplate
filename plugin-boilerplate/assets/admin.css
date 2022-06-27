@@ -11,6 +11,7 @@
 .PLUGIN_FUNC_PREFIX-tool-container {
     margin: 10px 10px 10px -5px;
     padding: 0 10px 10px 10px;
+    font-size: 14px;
 }
 
 .PLUGIN_FUNC_PREFIX-tool-container a {
@@ -65,7 +66,6 @@
     margin: 0 0;
     width: 10px;
     border-bottom: 1px solid darkgray;
-    height: 100%;
     top: 0;
 }
 
@@ -76,11 +76,70 @@
     border-bottom: 1px solid white;
 }
 
-.PLUGIN_FUNC_PREFIX-tool-container .content {
+.PLUGIN_FUNC_PREFIX-tool-content {
     border-left: 1px solid darkgray;
     border-right: 1px solid darkgray;
     border-bottom: 1px solid darkgray;
     background-color: white;
     padding: 10px;
     z-index: 0;
+}
+
+.PLUGIN_FUNC_PREFIX-tool-content card {
+    border: 1px solid lightgray;
+    padding: 8px;
+}
+
+/* ValidFormBuilder Styles */
+.vf__description p {
+    font-size: 1.1rem;
+}
+
+.vf__optional, .vf__required {
+    display: flex;
+    padding: 10px 10px 10px 8px;
+    border-bottom: 1px solid lightgray;
+}
+
+.vf__required {
+    font-weight: bold;
+}
+
+.vf__required label {
+    margin-right: 15px;
+}
+
+.vf__optional label {
+    margin-right: 15px;
+}
+
+.vf__required:last-child {
+    border-bottom: none;
+}
+
+.vf__optional:last-child {
+    border-bottom: none;
+}
+
+.vf__area {
+    border: 1px solid black;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 10px 10px 10px 8px;
+}
+
+.vf__area legend {
+    margin-left: 8px;
+}
+
+.vf__area.vf__disabled {
+    color: gray;
+}
+
+.vf__list {
+    margin: 4px 8px 0 8px;
+}
+
+.vf__list label {
+    display: block;
 }
