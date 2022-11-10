@@ -16,7 +16,7 @@ if ( ! function_exists( "PLUGIN_FUNC_PREFIX_has_permissions" ) ) {
 	 * @return void
 	 */
 	function PLUGIN_FUNC_PREFIX_has_permissions( $feature ) {
-		if ( current_user_can( \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS[ $feature ] ) ) {
+		if ( isset( \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS[ $feature ] ) && current_user_can( \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS[ $feature ] ) ) {
 			return true;
 		}
 
