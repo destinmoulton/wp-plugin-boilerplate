@@ -43,7 +43,13 @@ abstract class AbstractAdminTool {
 	 * @return void
 	 */
 	protected function enqueue() {
-		wp_enqueue_style( "PLUGIN_SLUG-admin-css", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "/assets/admin.css", [], PLUGIN_CONST_PREFIX_VERSION );
+		$enq_opts = [
+			'handle'  => "PLUGIN_FUNC_PREFIX-admin-css",
+			'context' => "admin",
+			'src'     => PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "/assets/admin.css",
+			'version' => PLUGIN_CONST_PREFIX_VERSION
+		];
+		PLUGIN_FUNC_PREFIX_enqueue_asset( $enq_opts );
 	}
 
 	/**

@@ -19,7 +19,14 @@ use ValidFormBuilder\ValidForm;
 
 class Form {
 	public static function enqueue_and_require() {
-		wp_enqueue_script( "PLUGIN_FUNC_PREFIX-validform-js", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "lib/validformbuilder/js/validform.js", [ "jquery" ], "1" );
+		$enq_opts = [
+			'handle'  => "PLUGIN_FUNC_PREFIX-validform-js",
+			'context' => "admin",
+			'src'     => PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "lib/validformbuilder/js/validform.js",
+			'deps'    => [ "jquery" ],
+			'version' => "1"
+		];
+		PLUGIN_FUNC_PREFIX_enqueue_asset( $enq_opts );
 
 		// The validformbuilder styles are a bit dated, so we roll our own
 		//wp_enqueue_style( "PLUGIN_FUNC_PREFIX-validform-css", PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "lib/validformbuilder/css/validform.css", [], "1" );
