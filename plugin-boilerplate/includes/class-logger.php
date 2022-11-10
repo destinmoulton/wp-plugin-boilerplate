@@ -321,7 +321,7 @@ class Logger {
 
 	private function _get_user_meta() {
 		$meta = get_user_meta( get_current_user_id(), $this->user_meta_key );
-		if ( is_array( $meta ) ) {
+		if ( is_array( $meta ) && isset( $meta[0] ) ) {
 			return $meta[0];
 		}
 
