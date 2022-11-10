@@ -12,7 +12,8 @@
 
 if ( ! function_exists( "PLUGIN_FUNC_PREFIX_has_permissions" ) ) {
 	/**
-	 * Define the global logging function.
+	 * Define the global permissions function
+	 *
 	 * @return void
 	 */
 	function PLUGIN_FUNC_PREFIX_has_permissions( $feature ) {
