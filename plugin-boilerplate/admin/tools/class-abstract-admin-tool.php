@@ -46,7 +46,7 @@ abstract class AbstractAdminTool {
 		$enq_opts = [
 			'handle'  => "PLUGIN_FUNC_PREFIX-admin-css",
 			'context' => "admin",
-			'src'     => PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "/assets/admin.css",
+			'src'     => PLUGIN_CONST_PREFIX_PLUGIN_URL_ROOT . "assets/admin.css",
 			'version' => PLUGIN_CONST_PREFIX_VERSION
 		];
 		PLUGIN_FUNC_PREFIX_enqueue_asset( $enq_opts );
