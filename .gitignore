@@ -1,5 +1,5 @@
 .idea
-config.yaml
+config.yaml*
 temp_wordpress
 node_modules
 .cache
