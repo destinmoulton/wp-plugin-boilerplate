@@ -387,7 +387,7 @@ class Logger {
 
         <script>
             (function () {
-                // GIZMO LOGGING
+                // Create the console function calls
                 console.log("%cPLUGIN_NAME Logging is Enabled.", "color:green;");
 				<?php
 				if(is_array( $this->log_entries )) {
