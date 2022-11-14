@@ -9,7 +9,7 @@
  * $TOOL_INFO is passed to every partial template.
  */
 
-use PLUGIN_PACKAGE\Admin\Tools;
+use PLUGIN_PACKAGE\Admin;
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
@@ -19,5 +19,5 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <h2><?= $TOOL_INFO['title'] ?></h2>
 <p><?= $hello_world ?></p>
 <p>
-    <a href="<?= Tools\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'do_something' ] ) ?>"><?= __( "Example Action", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
+    <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'do_something' ] ) ?>"><?= __( "Example Action", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
 </p>
