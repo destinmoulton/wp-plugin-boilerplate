@@ -50,6 +50,7 @@ class LogTool extends AbstractAdminTool {
 	}
 
 	private function actions() {
+		global $PLUGIN_FUNC_PREFIX_logger;
 		if ( isset( $_GET["action"] ) ) {
 			switch ( $_GET["action"] ) {
 				case "enable_logging":
