@@ -37,7 +37,7 @@ if ( ! function_exists( "PLUGIN_FUNC_PREFIX_log" ) ) {
 	function PLUGIN_FUNC_PREFIX_log() {
 		global $PLUGIN_FUNC_PREFIX_logger;
 
-		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( 'logging' ) ) {
+		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( 'logger' ) ) {
 			return;
 		}
 		if ( method_exists( $PLUGIN_FUNC_PREFIX_logger, "log" ) ) {
