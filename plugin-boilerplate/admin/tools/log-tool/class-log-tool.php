@@ -116,6 +116,7 @@ class LogTool extends AbstractAdminTool {
 
 	private function build_settings_form() {
 		global $PLUGIN_FUNC_PREFIX_logger;
+		$form = null;
 		if ( $PLUGIN_FUNC_PREFIX_logger->is_logging() ) {
 			$options = $PLUGIN_FUNC_PREFIX_logger->get_options();
 			$prefix  = 'log_tool_';
