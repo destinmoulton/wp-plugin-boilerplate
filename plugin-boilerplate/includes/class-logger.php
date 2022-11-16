@@ -33,68 +33,10 @@ class Logger {
 	private $user_meta_key = "PLUGIN_FUNC_PREFIX_logger_options";
 
 	/** @var array */
-	private $default_user_options = [
-		"enabled" => 0,
-
-		// 'console', 'file'
-		"log_to"  => [
-			"console" // js console
-		],
-		"php"     => [
-			"log_php_errors"  => 1,
-			"error_reporting" => [
-				"E_ERROR"
-			]
-		],
-		'file'    => [
-			// type can be either 'log' or 'html'
-			"type" => "html",
-			// the file extension is determined via the file_type
-			"name" => "PLUGIN_FUNC_PREFIX",
-			"dir"  => WP_CONTENT_DIR,
-		]
-	];
-
-
-	/** @var string */
-	public $logfile_separator; // public so that the parser can explode it
-
-	/** @var string[] */
-	private $php_exceptions = [
-		E_ERROR             => "E_ERROR",
-		E_WARNING           => "E_WARNING",
-		E_PARSE             => "E_PARSE",
-		E_NOTICE            => "E_NOTICE",
-		E_CORE_ERROR        => "E_CORE_ERROR",
-		E_CORE_WARNING      => "E_CORE_WARNING",
-		E_COMPILE_ERROR     => "E_COMPILE_ERROR",
-		E_COMPILE_WARNING   => "E_COMPILE_WARNING",
-		E_USER_ERROR        => "E_USER_ERROR",
-		E_USER_WARNING      => "E_USER_WARNING",
-		E_USER_NOTICE       => "E_USER_NOTICE",
-		E_STRICT            => "E_STRICT",
-		E_RECOVERABLE_ERROR => "E_RECOVERABLE_ERROR",
-		E_DEPRECATED        => "E_DEPRECATED",
-		E_USER_DEPRECATED   => "E_USER_DEPRECATED",
-	];
-
-
-	/** @var int[] */
-	private $user_allowed_php_errors = [];
-
-	private $log_colors = [
-		'default' => 'dimgray',
-		'error'   => 'maroon',
-		'success' => 'forestgreen',
-		'info'    => 'dodgerblue',
-		'warn'    => 'darkorange'
-	];
 
 	function __construct() {
 
-		$this->logfile_separator = "----------------------------------------------";
-
-		if ( ! PLUGIN_FUNC_PREFIX_has_permissions( 'logger' ) ) {
+		if ( ! \PLUGIN_FUNC_PREFIX_has_permissions( 'logger' ) ) {
 			return;
 		}
 
@@ -111,7 +53,7 @@ class Logger {
 			// Override the PHP error reporting
 			if ( $this->options['php']['log_php_errors'] == 1 ) {
 				error_reporting( E_ALL );
-				ini_set( "display_errors", 1 );
+				//ini_set("display_errors", 1);
 				set_error_handler( [ $this, "php_error_handler" ] );
 			}
 		}
@@ -126,41 +68,45 @@ class Logger {
 	public function php_error_handler( $errno, $errstr, $errfile = "", $errline = "" ) {
 		$data           = [];
 		$data['source'] = 'php';
-		$msg            = "";
-
-		// Is this error type enabled by the user?
-		if ( ! in_array( $errno, $this->user_allowed_php_errors ) ) {
-			return;
-		}
 
 		switch ( $errno ) {
 			case E_USER_ERROR:
-				echo "<h2>PLUGIN_NAME Error Handler</h2>";
-				echo "[$errno] $errstr<br />\n";
-				echo "  Fatal error on line $errline in file $errfile";
-				echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-				echo "<em>This error is appearing because you have enabled PLUGIN_NAME Logging.</em>";
-				exit( 1 );
-
-			case E_USER_WARNING:
-				$data['type'] = 'warn';
-				$msg          = "PHP Warning\n\n[$errno] $errstr\n\n";
+				$data['level'] = 'error';
+				$msg           = "PHP E_USER_ERROR\n\n[$errno] $errstr\n\n";
 				break;
-
+			case E_USER_WARNING:
+				$data['level'] = 'warn';
+				$msg           = "PHP E_USER_WARNING\n\n[$errno] $errstr\n\n";
+				break;
 			case E_USER_NOTICE:
-				$data['type'] = 'info';
-				$msg          = "PHP Notice\n\n[$errno] $errstr\n\n";
+				$data['level'] = 'info';
+				$msg           = "PHP E_USER_NOTICE\n\n[$errno] $errstr\n\n";
 				break;
 			case E_USER_DEPRECATED:
-				$data['type'] = 'log';
-				$msg          = "PHP Deprecated\n\n[$errno] $errstr\n\n";
+				$data['level'] = 'log';
+				$msg           = "PHP E_USER_DEPRECATED\n\n[$errno] $errstr\n\n";
+				break;
+			case E_ERROR:
+				$data['level'] = 'error';
+				$msg           = "PHP E_ERROR\n\n[$errno] $errstr\n\n";
 				break;
 			default:
-				$data['type'] = 'log';
-				$msg          = "PHP \n\n[$errno] $errstr\n\n";
+				$data['level'] = 'log';
+				$msg           = "PHP \n\n[$errno] $errstr\n\n";
 				break;
 		}
-		$data['args'][]      = $msg;
+		$data['args'][]         = $msg;
+		$data['unix_timestamp'] = time();
+		if ( $this->options['backtrace'] == 1 ) {
+			$backtrace = debug_backtrace();
+
+			// Remove the mention of this function from the backtrace
+			$orig = array_shift( $backtrace );
+			PLUGIN_FUNC_PREFIX_log( $backtrace );
+			$data['backtrace'] = print_r( $backtrace, true );
+		} else {
+			$data['backtrace'] = "";
+		}
 		$this->log_entries[] = $data;
 	}
 
@@ -177,21 +123,33 @@ class Logger {
 			return;
 		}
 
-		$logargs   = func_get_args();
+		$logargs = func_get_args();
+
+		$data = [];
+
 		$backtrace = debug_backtrace();
 
 		// Remove the mention of this function from the backtrace
-		$orig = array_shift( $backtrace );
+		array_shift( $backtrace );
 
-		$data              = [];
-		$data['backtrace'] = print_r( $backtrace, true );
-		$data['args']      = [];
-		$data['type']      = 'log';
-		$data['source']    = 'user';
+		if ( $this->options['backtrace'] == 1 ) {
+			$data['backtrace'] = print_r( $backtrace, true );
+		} else {
+			$data['backtrace'] = "";
+		}
 
+		$data['args']     = [];
+		$data['level']    = 'log';
+		$data['source']   = 'user';
+		$data['location'] = [
+			'file' => $backtrace[0]['file'],
+			'line' => $backtrace[0]['line']
+		];
+
+		$data['unix_timestamp'] = time();
 
 		if ( in_array( $logargs[0], [ 'error', 'warn', 'info', 'log' ] ) ) {
-			$data['type'] = $logargs[0];
+			$data['level'] = $logargs[0];
 		}
 		foreach ( $logargs as $arg ) {
 			if ( is_array( $arg ) ) {
@@ -228,15 +186,7 @@ class Logger {
 				if ( $this->options['enabled'] == 1 ) {
 					$this->is_enabled = true;
 				}
-
-				if ( $this->options['php']['log_php_errors'] == 1 ) {
-					// Convert the allowed PHP errors into a local array
-					foreach ( $this->options['php']['error_reporting'] as $excstr ) {
-						$this->user_allowed_php_errors[] = constant( $excstr );
-					}
-				}
 			}
-
 		}
 	}
 
@@ -258,15 +208,24 @@ class Logger {
 		return true;
 	}
 
+
+	/**
+	 * Set the user meta options and overwrite
+	 * this instance's set.
+	 *
+	 * @param $newoptions
+	 *
+	 * @return bool
+	 */
 	public function set_options( $newoptions ) {
 		if ( ! isset( $newoptions['enabled'] ) ) {
 			$newoptions['enabled'] = $this->options['enabled'];
 		}
 		if ( $this->are_options_valid( $newoptions ) ) {
 			$this->options = $newoptions;
-			$this->_set_user_meta();
+			$res           = $this->_set_user_meta();
 
-			return true;
+			return ! ( $res == false );
 		}
 
 		return false;
@@ -285,8 +244,8 @@ class Logger {
 			$this->hydrate();
 
 			if ( ! $this->is_hydrated ) {
-				// No user meta found/hydrated
-				$this->options = $this->default_user_options;
+				// No user meta found/hydrated; use defaults
+				$this->options = PLUGIN_CONST_PREFIX_LOGGER_DEFAULT_SETTINGS;
 			}
 		}
 
@@ -315,7 +274,7 @@ class Logger {
 	 */
 	public function reset_user_logging() {
 		$this->log_entries = array();
-		$this->options     = $this->default_user_options;
+		$this->options     = PLUGIN_CONST_PREFIX_LOGGER_DEFAULT_SETTINGS;
 		$this->_set_user_meta();
 	}
 
@@ -328,12 +287,17 @@ class Logger {
 		return [];
 	}
 
-	private function _set_user_meta() {
+	/**
+	 * Set the user meta settings for the logger.
+	 *
+	 * @return bool|int
+	 */
+	public function _set_user_meta() {
 		$meta = $this->_get_user_meta();
 		if ( is_array( $meta ) && isset( $meta['enabled'] ) ) {
-			update_user_meta( get_current_user_id(), $this->user_meta_key, $this->options );
+			return update_user_meta( get_current_user_id(), $this->user_meta_key, $this->options );
 		} else {
-			add_user_meta( get_current_user_id(), $this->user_meta_key, $this->options, true );
+			return add_user_meta( get_current_user_id(), $this->user_meta_key, $this->options, true );
 		}
 	}
 
@@ -341,20 +305,20 @@ class Logger {
 		delete_user_meta( get_current_user_id(), $this->user_meta_key );
 	}
 
-	/**
-	 * @return string
-	 */
-	public function get_log_type() {
-		return $this->options['type'];
-	}
 
 	/**
 	 * @return string
 	 */
 	public function get_log_file_path() {
-		return $this->options['file']['dir'] . "/" . $this->options['file']['name'] . "." . $this->options['file']['type'];
+		return $this->options['file']['dir'] . "/" . $this->options['file']['name'];
 	}
 
+	/**
+	 * @return string
+	 */
+	public function get_log_file_url() {
+		return site_url( $this->options['file']['uri_path'] . $this->options['file']['name'] );
+	}
 
 	/**
 	 * @return bool
@@ -382,31 +346,62 @@ class Logger {
 	}
 
 
+	/**
+	 * Generate Javascript Console Commands
+	 *
+	 * @return void
+	 */
 	public function wp_action_output_console() {
+		$timezone = wp_timezone_string();
 		?>
-
         <script>
             (function () {
-                // Create the console function calls
-                console.log("%cPLUGIN_NAME Logging is Enabled.", "color:green;");
+
+
+                console.log("%cPLUGIN_PACKAGE Plugin - Console Log is Enabled.", "color:green;");
 				<?php
+				if ($this->is_logging_to_file()) {
+				?>
+                console.groupCollapsed("%cPLUGIN_PACKAGE Plugin - File Log is Enabled", "color:darkorange;");
+                console.log("<?=$this->get_log_file_path()?>");
+                console.log("<?=$this->get_log_file_url()?>");
+                console.groupEnd();
+				<?
+				}
 				if(is_array( $this->log_entries )) {
 				foreach ($this->log_entries as $idx=>$log) {
-				// Make the title of the group a bit prettier
-				$title = preg_replace( '/\v+/', '', substr( $log['args'][0], 0, 80 ) );
-				$style = "color:{$this->log_colors['default']}";
-				if ( isset( $colors[ $log['type'] ] ) ) {
-					$style = "color:" . $this->log_colors[ $log['type'] ];
-				}
-				?>
-                console.groupCollapsed(`%c<?=$log['source'] . " " . $log['type'] . "#" . $idx?>: <?=$title ?>...`, '<?=$style?>');
 
+				// The title should include the first part of the logged data
+				$title = substr( $log['args'][0], 0, 60 );
+
+				// Remove all extra whitespace
+				$title = preg_replace( '/\s+/', ' ', $title );
+
+				// Make the title of the group a bit prettier
+				$title = preg_replace( '/\v+/', '', $title );
+
+				$style = "color:" . PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS['default'];
+				if ( isset( $this->log_colors[ $log['level'] ] ) ) {
+					$style = "color:" . PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS[ $log['level'] ];
+				}
+
+				// Convert UTC to WP timezone
+				$dt = new \DateTime( null, new \DateTimeZone( "UTC" ) );
+				$dt->setTimestamp( $log['unix_timestamp'] );
+				$dt->setTimezone( new \DateTimeZone( $timezone ) );
+
+				$date = $dt->format( $this->options['console']['date_format'] );
+				$source = strtoupper( $log['source'] );
+				$level = strtoupper( $log['level'] );
+				?>
+                console.groupCollapsed(`%c<?= $date . " [" . $source . "] [" . $level . "] " . $title ?>...`, '<?=$style?>');
+                console.log("<?= $log['location']['file']?>:<?= $log['location']['line']?>");
 				<?php foreach ($log['args'] as $arg):?>
-                console['<?=$log['type']?>'](`<?=$arg?>`);
+                console['<?=$log['level']?>'](`<?=$arg?>`);
 				<?php endforeach;?>
 
-				<?php if(isset( $data['backtrace'] )):?>
-                console.groupCollapsed(`backtrace`);
+				<?php if($this->options['backtrace'] == 1 && $log['backtrace'] != ""):?>
+                console.groupCollapsed(`[PHP BACKTRACE]`);
                 console.log(`<?=$log['backtrace']?>`);
                 console.groupEnd();
 				<?php endif;?>
@@ -426,12 +421,23 @@ class Logger {
 		if ( ! $this->is_logging() ) {
 			return;
 		}
-		$txt = "";
+		$txt      = "";
+		$timezone = wp_timezone_string();
 		if ( isset( $this->log_entries ) ) {
 			foreach ( $this->log_entries as $log ) {
-				$txt .= PHP_EOL . $this->logfile_separator . PHP_EOL;
-				$txt .= "TIME: " . date( "F j, Y, g:i a" );
-				$txt .= PHP_EOL;
+				// Convert UTC to WP timezone
+				$dt = new \DateTime( null, new \DateTimeZone( "UTC" ) );
+				$dt->setTimestamp( $log['unix_timestamp'] );
+				$dt->setTimezone( new \DateTimeZone( $timezone ) );
+
+				$source = strtoupper( $log['source'] );
+				$level  = strtoupper( $log['level'] );
+				$txt    .= $this->options['file']['separator'];
+				$txt    .= $dt->format( $this->options['file']['date_format'] );
+				$txt    .= " [" . $source . "] [" . $level . "] ";
+				$txt    .= PHP_EOL;
+				$txt    .= $log['location']['file'] . ":" . $log['location']['line'];
+				$txt    .= PHP_EOL;
 
 				foreach ( $log['args'] as $arg ) {
 					$txt .= $arg;
@@ -451,20 +457,6 @@ class Logger {
 	}
 
 	/**
-	 * @return string[]
-	 */
-	public function get_php_exceptions() {
-		return $this->php_exceptions;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function get_php_exception_name( $exc ) {
-		return $this->php_exceptions[ $exc ];
-	}
-
-	/**
 	 * Test the keys and values of the default_options
 	 * exist in the $test
 	 *
@@ -473,7 +465,7 @@ class Logger {
 	 * @return bool
 	 */
 	public function are_options_valid( $test ) {
-		foreach ( $this->default_user_options as $dskey => $dsopt ) {
+		foreach ( PLUGIN_CONST_PREFIX_LOGGER_DEFAULT_SETTINGS as $dskey => $dsopt ) {
 			if ( ! isset( $test[ $dskey ] ) ) {
 				return false;
 			}
@@ -483,7 +475,7 @@ class Logger {
 	}
 
 	public function get_default_options() {
-		return $this->default_user_options;
+		return PLUGIN_CONST_PREFIX_LOGGER_DEFAULT_SETTINGS;
 	}
 
 	public function clear_log_file() {

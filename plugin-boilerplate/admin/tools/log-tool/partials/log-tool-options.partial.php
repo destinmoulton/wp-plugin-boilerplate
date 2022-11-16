@@ -13,33 +13,36 @@ use PLUGIN_PACKAGE\Admin;
 /** @var $is_logging_to_file bool */
 /** @var $log_file_path bool */
 /** @var $form_html string */
+
+$status = $logger_is_running ? "Enabled" : "Disabled";
 ?>
 
 <div>
-    <h3>Status: <?= $logger_is_running ? "Logging Enabled" : "Logging Disabled" ?></h3>
     <div class="card">
-        <h4>Options</h4>
+        <h4>Details</h4>
         <ul>
-            <li>
-                <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'reset_logging' ] ) ?>"><?= __( "Reset Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
-            </li>
+            <li>Status: Console Log <b><?= $status ?></b></li>
+        </ul>
+        <h4>Commands</h4>
+        <ul>
 			<?php if ( $logger_is_running ): ?>
                 <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'disable_logging' ] ) ?>"><?= __( "Turn Off Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
                 <li>
-                    <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'test_logging' ] ) ?>"><?= __( "Invoke a Test Log Message", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
+                    <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'test_user_log' ] ) ?>"><?= __( "Invoke a Test Log Message", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
-				<?php if ( $is_logging_to_file ): ?>
-                    <li>
-                        <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'clear_file_log' ] ) ?>"><?= __( "Clear The File Log", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
-                    </li>
-				<?php endif; ?>
+                <li>
+                    <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'test_php_log' ] ) ?>"><?= __( "Invoke a Test of PHP User Exceptions", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
+                </li>
 			<?php else: ?>
                 <li>
                     <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'enable_logging' ] ) ?>"><?= __( "Enable Logging", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
                 </li>
 			<?php endif; ?>
+            <li>
+                <a href="<?= Admin\PLUGIN_FUNC_PREFIX_tool_url( $TOOL_INFO, [ 'action' => 'reset_logging' ] ) ?>"><?= __( "Reset Your Log Tool Metadata", PLUGIN_CONST_PREFIX_TEXTDOMAIN ) ?></a>
+            </li>
         </ul>
     </div>
 

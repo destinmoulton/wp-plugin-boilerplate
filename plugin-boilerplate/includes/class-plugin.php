@@ -32,18 +32,21 @@ class Plugin {
 		// Constants are configured in constants.php
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/constants.php" );
 
+		// Define globals
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/globals.php" );
+
+		// Define functions in functions.php
+		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
+
 		// Logger class
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-logger.php" );
 
 		// The Settings class with static methods
 		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/class-settings.php" );
 
-		// Define functions in functions.php
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/functions.php" );
-
-		// Define globals
-		// Globals might rely on the above features
-		require_once( PLUGIN_CONST_PREFIX_PLUGIN_ROOT . "includes/globals.php" );
+		// Initialize the Logger
+		global $PLUGIN_FUNC_PREFIX_logger;
+		$PLUGIN_FUNC_PREFIX_logger = new \PLUGIN_PACKAGE\Logger();
 	}
 
 	/**

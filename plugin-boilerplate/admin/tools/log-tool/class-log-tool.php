@@ -80,14 +80,18 @@ class LogTool extends AbstractAdminTool {
 		$form = $this->build_settings_form();
 		if ( isset( $_GET["action"] ) ) {
 			switch ( $_GET["action"] ) {
-				case "test_logging":
+				case "test_user_log":
 					\PLUGIN_FUNC_PREFIX_log( array( "test" => PLUGIN_CONST_PREFIX_NAME . " :: This is a test!" ) );
 					break;
-				case "clear_file_log":
-					$PLUGIN_FUNC_PREFIX_logger->clear_log_file();
+				case "test_php_log":
+					trigger_error( "Test User PHP Deprecation", E_USER_DEPRECATED );
+					trigger_error( "Test User PHP Warning", E_USER_WARNING );
+					trigger_error( "Test User PHP Notice", E_USER_NOTICE );
+					trigger_error( "Test User PHP Error", E_USER_ERROR );
 					break;
 				case "process_form":
 					$this->save_log_settings( $form );
+					$this->redirect( $this->base_url );
 					break;
 				default:
 					break;
@@ -108,10 +112,23 @@ class LogTool extends AbstractAdminTool {
 
 	public function tab_logfile() {
 		global $PLUGIN_FUNC_PREFIX_logger;
-		$logfile_path             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
-		$logfile_contents         = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
-		$pdata['logfile_path']    = $logfile_path;
-		$pdata['logfile_entries'] = explode( $PLUGIN_FUNC_PREFIX_logger->logfile_separator, $logfile_contents );
+		if ( isset( $_GET["action"] ) ) {
+			switch ( $_GET["action"] ) {
+				case "clear_log_file":
+					$PLUGIN_FUNC_PREFIX_logger->clear_log_file();
+					$this->redirect( $this->tab_url );
+					break;
+				default:
+					break;
+			}
+		}
+		$options                          = $PLUGIN_FUNC_PREFIX_logger->get_options();
+		$logfile_path                     = $PLUGIN_FUNC_PREFIX_logger->get_log_file_path();
+		$logfile_contents                 = $PLUGIN_FUNC_PREFIX_logger->get_log_file_contents();
+		$pdata['logfile_path']            = $logfile_path;
+		$pdata['logfile_url']             = $PLUGIN_FUNC_PREFIX_logger->get_log_file_url();
+		$pdata['is_file_logging_enabled'] = $PLUGIN_FUNC_PREFIX_logger->is_logging_to_file();
+		$pdata['logfile_entries']         = explode( $options['file']['separator'], $logfile_contents );
 		$this->add_partial( $this->get_path() . "partials/log-file.partial.php", $pdata );
 	}
 
@@ -121,7 +138,7 @@ class LogTool extends AbstractAdminTool {
 		if ( $PLUGIN_FUNC_PREFIX_logger->is_logging() ) {
 			$options = $PLUGIN_FUNC_PREFIX_logger->get_options();
 			$prefix  = 'log_tool_';
-			$form    = new ValidForm( $prefix . "_options", "Logging Options", $this->base_url . "&action=process_form" );
+			$form    = new ValidForm( $prefix . "_options", "Log Tool Settings", $this->base_url . "&action=process_form" );
 
 			// We will use wp csrf
 			$form->setUseCsrfProtection( false );
@@ -132,22 +149,21 @@ class LogTool extends AbstractAdminTool {
 			$logtoops = [ 'console' => 'JS Console', 'file' => 'File' ];
 			$this->build_field_group( $logto, $logtoops, $options['log_to'] );
 
-			$form->addField( "file_name", "File name (without extension):", ValidForm::VFORM_STRING );
+			$form->addField( "file_name", "Log File name:", ValidForm::VFORM_STRING, [], [], [ "class" => "no-border-bottom" ] );
 
-			$ftype = $form->addField( "file_type", "File log type:", ValidForm::VFORM_RADIO_LIST );
-			$fops  = [ 'log' => 'Log', 'html' => 'HTML' ];
+			$form->addParagraph( "Log file directory: " . $options['file']['dir'] . "<br>For security, this dir is only configurable in the constants.php file." );
 
-			$this->build_field_group( $ftype, $fops, [ $options['file']['type'] ] );
+			$is_backtrace = $options['backtrace'] == 1;
+			$form->addField( "backtrace", "Show full backtrace?", ValidForm::VFORM_BOOLEAN );
 
-			$phparea   = $form->addArea( 'Enable PHP Error Handling?', $options['php']['log_php_errors'], "php_log_php_errors" );
-			$checklist = $phparea->addField( "php_error_levels", "PHP Error Levels", ValidForm::VFORM_CHECK_LIST );
-			foreach ( $PLUGIN_FUNC_PREFIX_logger->get_php_exceptions() as $ekey => $ename ) {
-				$selected = false;
-				if ( in_array( $ename, $options['php']['error_reporting'] ) ) {
-					$selected = true;
-				}
-				$checklist->addField( $ename, $ename, $selected );
-			}
+			$is_php_error_handling = $options['php']['log_php_errors'] == 1;
+			$form->addField( "php_log_php_errors", "Capture PHP Errors?", ValidForm::VFORM_BOOLEAN );
+
+			$form->setDefaults( [
+				'file_name'          => $options['file']['name'],
+				'backtrace'          => $is_backtrace,
+				'php_log_php_errors' => $is_php_error_handling
+			] );
 		}
 
 		return $form;
@@ -171,14 +187,24 @@ class LogTool extends AbstractAdminTool {
 			$new['enabled'] = 1;
 		}
 
-		if ( ! isset( $_POST['log_to'] ) ) {
-			$new['log_to'] = [];
-		} else {
-			$new['log_to'] = $_POST['log_to'];
+		$new['log_to'] = $_POST['log_to'];
+
+		$filename = $_POST['file_name'];
+		// Remove anything which isn't a word, whitespace, number
+		// or any of the following caracters -_~,;[]().
+		$filename = mb_ereg_replace( "([^\w\s\d\-_~,;\[\]\(\).])", '', $filename );
+		// Remove any runs of periods (thanks falstro!)
+		$filename = mb_ereg_replace( "([\.]{2,})", '', $filename );
+
+		$new['file']['name'] = $filename;
+
+		$new['backtrace'] = 0;
+		if ( isset( $_POST['backtrace'] ) && $_POST['backtrace'] == "on" ) {
+			$new['backtrace'] = 1;
 		}
-		if ( ! isset( $_POST['php_log_php_errors'] ) || ! $_POST['php_log_php_errors'] ) {
-			$new['php']['log_php_errors'] = 0;
-		} elseif ( $_POST['php_log_php_errors'] == 'on' ) {
+
+		$new['php']['log_php_errors'] = 0;
+		if ( isset( $_POST['php_log_php_errors'] ) && $_POST['php_log_php_errors'] == "on" ) {
 			$new['php']['log_php_errors'] = 1;
 		}
 
@@ -188,7 +214,14 @@ class LogTool extends AbstractAdminTool {
 
 			$new['php']['error_reporting'] = $_POST['php_error_levels'];
 		}
-		exit();
+
+		$res = $PLUGIN_FUNC_PREFIX_logger->set_options( $new );
+
+		if ( $res == false ) {
+			\PLUGIN_PACKAGE\Notices::error( "Failed to save Log Tool settings." );
+		} else {
+			\PLUGIN_PACKAGE\Notices::success( "Successfully saved Log Tool settings." );
+		}
 	}
 
 }

@@ -9,9 +9,10 @@
  * $TOOL_INFO is passed to every partial template.
  */
 
-use PLUGIN_PACKAGE\Admin;
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
+use PLUGIN_PACKAGE\Admin;
 
 /** @var $TOOL_INFO array Has tool `title`, `description`, `url`, 'slug`, `uri_slug` */
 /** @var $hello_world string */

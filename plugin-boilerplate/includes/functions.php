@@ -9,12 +9,10 @@
  * @link      PLUGIN_URI
  */
 
-
 if ( ! function_exists( "PLUGIN_FUNC_PREFIX_has_permissions" ) ) {
 	/**
-	 * Define the global permissions function
-	 *
-	 * @return bool
+	 * Define the global logging function.
+	 * @return void
 	 */
 	function PLUGIN_FUNC_PREFIX_has_permissions( $feature ) {
 		if ( isset( \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS[ $feature ] ) && current_user_can( \PLUGIN_PACKAGE\PLUGIN_CONST_PREFIX_FEATURE_PERMISSIONS[ $feature ] ) ) {

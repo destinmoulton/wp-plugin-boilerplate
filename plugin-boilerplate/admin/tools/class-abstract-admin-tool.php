@@ -15,6 +15,8 @@ abstract class AbstractAdminTool {
 	/** @var string */
 	protected $base_url;
 	/** @var string */
+	protected $tab_url;
+	/** @var string */
 	protected $description;
 	/** @var array */
 	protected $partials;
@@ -238,6 +240,11 @@ abstract class AbstractAdminTool {
 				$this->active_tab_slug = $t['slug'];
 			}
 		}
+
+		$this->tab_url = admin_url( 'admin.php?' . http_build_query( [
+				'page' => $this->uri_slug,
+				'tab'  => $this->active_tab_slug
+			] ) );
 		call_user_func( $tab['method'] );
 	}
 
