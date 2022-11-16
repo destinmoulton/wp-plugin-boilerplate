@@ -101,8 +101,7 @@ class Logger {
 			$backtrace = debug_backtrace();
 
 			// Remove the mention of this function from the backtrace
-			$orig = array_shift( $backtrace );
-			PLUGIN_FUNC_PREFIX_log( $backtrace );
+			array_shift( $backtrace );
 			$data['backtrace'] = print_r( $backtrace, true );
 		} else {
 			$data['backtrace'] = "";
