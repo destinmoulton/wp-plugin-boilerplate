@@ -72,39 +72,62 @@ class Logger {
 		switch ( $errno ) {
 			case E_USER_ERROR:
 				$data['level'] = 'error';
-				$msg           = "PHP E_USER_ERROR\n\n[$errno] $errstr\n\n";
+				$msg           = "PHP E_USER_ERROR [$errno]\n\n$errstr\n\n";
 				break;
 			case E_USER_WARNING:
 				$data['level'] = 'warn';
-				$msg           = "PHP E_USER_WARNING\n\n[$errno] $errstr\n\n";
+				$msg           = "PHP E_USER_WARNING [$errno]\n\n$errstr\n\n";
 				break;
 			case E_USER_NOTICE:
 				$data['level'] = 'info';
-				$msg           = "PHP E_USER_NOTICE\n\n[$errno] $errstr\n\n";
+				$msg           = "PHP E_USER_NOTICE [$errno]\n\n$errstr\n\n";
 				break;
 			case E_USER_DEPRECATED:
 				$data['level'] = 'log';
-				$msg           = "PHP E_USER_DEPRECATED\n\n[$errno] $errstr\n\n";
+				$msg           = "PHP E_USER_DEPRECATED [$errno]\n\n$errstr\n\n";
 				break;
 			case E_ERROR:
 				$data['level'] = 'error';
-				$msg           = "PHP E_ERROR\n\n[$errno] $errstr\n\n";
+				$msg           = "PHP E_ERROR [$errno]\n\n$errstr\n\n";
+				break;
+			case E_WARNING:
+				$data['level'] = 'warn';
+				$msg           = "PHP E_WARNING [$errno]\n\n$errstr\n\n";
+				break;
+			case E_NOTICE:
+				$data['level'] = 'info';
+				$msg           = "PHP E_NOTICE [$errno]\n\n$errstr\n\n";
+				break;
+			case E_DEPRECATED:
+				$data['level'] = 'log';
+				$msg           = "PHP E_DEPRECATED [$errno]\n\n$errstr\n\n";
 				break;
 			default:
 				$data['level'] = 'log';
-				$msg           = "PHP \n\n[$errno] $errstr\n\n";
+				$msg           = "PHP UNTRACKED [$errno]\n\n$errstr\n\n";
 				break;
 		}
-		$data['args'][]         = $msg;
-		$data['unix_timestamp'] = time();
+		$backtrace = debug_backtrace();
+		array_shift( $backtrace );
 		if ( $this->options['backtrace'] == 1 ) {
-			$backtrace = debug_backtrace();
-
 			// Remove the mention of this function from the backtrace
-			array_shift( $backtrace );
 			$data['backtrace'] = print_r( $backtrace, true );
 		} else {
 			$data['backtrace'] = "";
+		}
+
+		$data['args'][]         = $msg;
+		$data['unix_timestamp'] = time();
+		if ( isset( $backtrace[0]['file'] ) ) {
+			$data['location'] = [
+				'file' => $backtrace[0]['file'],
+				'line' => $backtrace[0]['line']
+			];
+		} else {
+			$data['location'] = [
+				'file' => "",
+				'line' => ""
+			];
 		}
 		$this->log_entries[] = $data;
 	}
@@ -380,7 +403,7 @@ class Logger {
 				$title = preg_replace( '/\v+/', '', $title );
 
 				$style = "color:" . PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS['default'];
-				if ( isset( $this->log_colors[ $log['level'] ] ) ) {
+				if ( isset( PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS[ $log['level'] ] ) ) {
 					$style = "color:" . PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS[ $log['level'] ];
 				}
 
