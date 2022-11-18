@@ -79,8 +79,7 @@ const PLUGIN_CONST_PREFIX_LOGGER_CONSOLE_COLORS = [
 	'default' => 'dimgray',
 	'error'   => 'maroon',
 	'success' => 'forestgreen',
-	'info'    => 'dodgerblue',
-	'notice'  => 'gold',
+	'info'    => 'gold',
 	'warn'    => 'darkorange'
 ];
 
